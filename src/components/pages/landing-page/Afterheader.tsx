@@ -2,10 +2,10 @@ import React from "react";
 import { Card,CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Trophy,Play,Users,Settings } from "lucide-react";
+import Link from "next/link";
 
 const Afterheader = () => {
     
-
     const StartSingleplayer=()=>{
 
     }
@@ -57,17 +57,19 @@ const Afterheader = () => {
             </div>
 
             <div className="grid sm:grid-cols-2 gap-4">
-              <Button
-                onClick={StartSingleplayer}
-                className="h-16 bg-blue-600 hover:bg-blue-700 text-white text-lg"
-                size="lg"
-              >
-                <Play className="w-6 h-6 mr-3" />
-                <div className="text-left">
-                  <div>Single Player</div>
-                </div>
-              </Button>
-
+              <Link href={"/single-player"} passHref>
+                <Button
+                  onClick={StartSingleplayer}
+                  className="h-16 w-full bg-blue-600 hover:bg-blue-700 text-white text-lg"
+                  size="lg"
+                >
+                  <Play className="w-6 h-6 mr-3" />
+                  <div className="text-left">
+                    <div>Single Player</div>
+                  </div>
+                </Button>
+              </Link>
+              
               <Button
                 onClick={StartMultiplayer}
                 className="h-16 bg-green-600 hover:bg-green-700 text-white text-lg"
