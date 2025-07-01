@@ -8,11 +8,7 @@ import Image from "next/image";
 
 const Header = () => {
     const { data: session, status } = useSession();
-    const loading = status === "loading";
 
-    if (loading) {
-        return <p>Loading...</p>;
-    }
   return (
     <div>
       <header className="border-b shadow-lg p-4 bg-blue-600">
