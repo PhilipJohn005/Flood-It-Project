@@ -2,12 +2,39 @@
 
 import React, { useState } from "react";
 import { Key } from "lucide-react";
+import io from "socket.io-client";
+import { useRouter } from "next/navigation";
+
 
 const Joinroom = () => {
   const [roomKey, setRoomKey] = useState("");
+  const [name,setName]=useState("");
+  const [username,setUsername]=useState("");
 
-  const handleJoinRoom = () => {
-    
+  const router=useRouter();
+
+
+  const socket=io("http://localhost:4000");
+
+
+  const handleJoinRoom = () => {  
+    interface JoinRoomPayload {
+      roomKey: string;
+      name: string;
+    }
+    interface JoinRoomResponse {
+      error?: string;
+    }
+    if(!roomKey)return;
+    socket.emit('join-room',{roomKey,name,} as JoinRoomPayload,(res: JoinRoomResponse) => {
+        if (res.error) {
+          alert(res.error);
+        } else {
+          router.push(`/multi-player/${roomKey}?name=${username}`);
+        }
+      }
+    );
+
   };
 
   return (

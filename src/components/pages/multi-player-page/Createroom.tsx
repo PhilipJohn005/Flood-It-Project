@@ -4,6 +4,7 @@ import React, { useState } from 'react'
 import { ArrowLeft,Grid3X3 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { nanoid } from 'nanoid'
+import io from 'socket.io-client';
 
 const Createroom = () => {
   const [gridSize,setGridSize]=useState(3);
@@ -11,20 +12,23 @@ const Createroom = () => {
   const [rounds,setRounds]=useState(1);
   const [name,setName]=useState('');
   const router=useRouter();
+  const socket = io("http://localhost:4000");
 
   const handleCreateRoom=()=>{
 
-    const roomKey=nanoid(6);
-
-    const queryParams = new URLSearchParams({
-      gridSize: gridSize.toString(),
-      colors: colorCount.toString(),
-      rounds: rounds.toString(),
-      mode: 'create',
+    socket.emit("create-room", {
       name,
-    });
+      gridSize,
+      colors: colorCount,
+      rounds,
+    }, ({ roomKey }: { roomKey: string }) => {
+      const queryParams = new URLSearchParams({
+        name,
+        mode: 'create',
+      });
 
-    router.push(`/multi-player/${roomKey}?${queryParams.toString()}`);    
+      router.push(`/multi-player/${roomKey}?${queryParams.toString()}`);
+    });    
   }
 
   return (
