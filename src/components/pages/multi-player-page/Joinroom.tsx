@@ -4,37 +4,21 @@ import React, { useState } from "react";
 import { Key } from "lucide-react";
 import io from "socket.io-client";
 import { useRouter } from "next/navigation";
-
+import { getSocket } from "@/lib/socket";
 
 const Joinroom = () => {
   const [roomKey, setRoomKey] = useState("");
-  const [name,setName]=useState("");
+  const [name]=useState("john");
   const [username,setUsername]=useState("");
 
   const router=useRouter();
 
 
-  const socket=io("http://localhost:4000");
+  const socket=getSocket();
 
 
   const handleJoinRoom = () => {  
-    interface JoinRoomPayload {
-      roomKey: string;
-      name: string;
-    }
-    interface JoinRoomResponse {
-      error?: string;
-    }
-    if(!roomKey)return;
-    socket.emit('join-room',{roomKey,name,} as JoinRoomPayload,(res: JoinRoomResponse) => {
-        if (res.error) {
-          alert(res.error);
-        } else {
-          router.push(`/multi-player/${roomKey}?name=${username}`);
-        }
-      }
-    );
-
+     router.push(`/multi-player/${roomKey}?name=${name}`);
   };
 
   return (
@@ -54,7 +38,7 @@ const Joinroom = () => {
           <input
             type="text"
             value={roomKey}
-            onChange={(e) => setRoomKey(e.target.value.toUpperCase())}
+            onChange={(e) => setRoomKey(e.target.value)}
             placeholder="Enter 6-character room key"
             className="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-3 text-white placeholder-slate-500 focus:border-slate-500 focus:outline-none transition-colors text-center font-mono tracking-wider"
             maxLength={6}

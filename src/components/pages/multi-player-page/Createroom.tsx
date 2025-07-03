@@ -1,10 +1,11 @@
 "use client"
 
-import React, { useState } from 'react'
+import React, { useRef, useState,useEffect } from 'react'
 import { ArrowLeft,Grid3X3 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { nanoid } from 'nanoid'
 import io from 'socket.io-client';
+import { getSocket } from '@/lib/socket'
 
 const Createroom = () => {
   const [gridSize,setGridSize]=useState(3);
@@ -12,11 +13,13 @@ const Createroom = () => {
   const [rounds,setRounds]=useState(1);
   const [name,setName]=useState('');
   const router=useRouter();
-  const socket = io("http://localhost:4000");
+  const socketRef = useRef<SocketIOClient.Socket | null>(null);
+  
+  const socket=getSocket();
 
-  const handleCreateRoom=()=>{
 
-    socket.emit("create-room", {
+  const handleCreateRoom = () => {
+     socket.emit("create-room", {
       name,
       gridSize,
       colors: colorCount,
@@ -29,7 +32,7 @@ const Createroom = () => {
 
       router.push(`/multi-player/${roomKey}?${queryParams.toString()}`);
     });    
-  }
+  };
 
   return (
     <div>

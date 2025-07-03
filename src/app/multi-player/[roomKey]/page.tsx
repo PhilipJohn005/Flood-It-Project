@@ -6,24 +6,72 @@ import {
   Copy, Users, Grid3X3, Palette,
   ArrowLeft, Check, Crown
 } from 'lucide-react'
+import { getSocket } from '@/lib/socket'
+
+interface Player {
+  id: string;
+  name: string;
+}
+
+interface Room {
+  host: string;
+  players: Player[];
+  settings: { gridSize: number; colors: number; rounds: number };
+  started: boolean;
+}
 
 const RoomPage = () => {
   const { roomKey } = useParams()
-  if(!roomKey)return;
+  if (!roomKey) return;
   const searchParams = useSearchParams()
   const router = useRouter()
 
-  const gridSize = searchParams.get('gridSize') ?? '12'
-  const colors = searchParams.get('colors') ?? '6'
-  const rounds = searchParams.get('rounds') ?? '1'
+  const [room, setRoom] = useState<Room | null>(null)
+  const [gridSize, setGridSize] = useState<number>(12)
+  const [colors, setColors] = useState<number>(6)
+  const [rounds, setRounds] = useState<number>(1)
+  const [isLoading, setIsLoading] = useState(true)
+
   const mode = searchParams.get('mode') ?? 'join'
   const name = searchParams.get('name') ?? 'Player'
   const isCreator = mode === 'create'
-
   const [copied, setCopied] = useState(false)
   const [selectedColor, setSelectedColor] = useState('#EF4444')
 
-  // Generate sample color palette
+  useEffect(() => {
+    const socket = getSocket()
+    if (!roomKey || !name) return
+
+    socket.emit('join-room', { roomKey, name }, (res: any) => {
+      if (res?.error) {
+        alert(res.error)
+        router.push('/multi-player')
+      }
+    })
+
+    const handleUpdate = (updatedRoom: Room) => {
+      setRoom(updatedRoom)
+      setGridSize(updatedRoom.settings.gridSize)
+      setColors(updatedRoom.settings.colors)
+      setRounds(updatedRoom.settings.rounds)
+      setIsLoading(false)
+    }
+
+    socket.on('room-updated', handleUpdate)
+
+    return () => {
+      socket.off('room-updated', handleUpdate)
+    }
+  }, [roomKey, name])
+
+  const copyRoomKey = async () => {
+    if (roomKey && typeof roomKey === 'string') {
+      await navigator.clipboard.writeText(roomKey)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    }
+  }
+
   const generateColorPalette = (count: number) => {
     const baseColors = [
       '#EF4444', '#F97316', '#F59E0B', '#EAB308', '#84CC16', '#22C55E',
@@ -33,19 +81,19 @@ const RoomPage = () => {
     return baseColors.slice(0, count)
   }
 
-  const colorPalette = generateColorPalette(parseInt(colors))//convert to int
-  const gridCells = Array(parseInt(gridSize) * parseInt(gridSize)).fill(null)
+  const colorPalette = generateColorPalette(colors)
+  const gridCells = Array(gridSize * gridSize).fill(null)
 
   useEffect(() => {
     setSelectedColor(colorPalette[0])
   }, [colors])
 
-  const copyRoomKey = async () => {
-    if (roomKey && typeof roomKey === 'string') {
-      await navigator.clipboard.writeText(roomKey)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
-    }
+  if (isLoading || !room) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-white text-xl font-semibold">Loading room...</div>
+      </div>
+    )
   }
 
   return (
@@ -60,7 +108,7 @@ const RoomPage = () => {
             >
               <ArrowLeft size={20} className="" />
             </button>
-            
+
             <div>
               <div className="flex items-center gap-3 mb-1">
                 <h1 className="text-2xl font-bold ">Room: {roomKey}</h1>
@@ -82,7 +130,7 @@ const RoomPage = () => {
                 </span>
                 <span className="flex items-center gap-1">
                   <Users size={16} />
-                  1 online
+                  {room?.players?.length ?? 1} online
                 </span>
               </div>
               <button className='px-4 py-2 bg-red-400 cursor-pointer hover:bg-red-500 rounded-md'>
@@ -105,11 +153,11 @@ const RoomPage = () => {
           <div className="lg:col-span-3">
             <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10">
               <h2 className="text-xl font-semibold mb-4">Canvas</h2>
-              
+
               <div className="bg-white rounded-xl p-4 overflow-auto">
-                <div 
+                <div
                   className="grid gap-1 mx-auto"
-                  style={{ 
+                  style={{
                     gridTemplateColumns: `repeat(${gridSize}, 1fr)`,
                     width: 'fit-content',
                     maxWidth: '100%'
@@ -139,11 +187,10 @@ const RoomPage = () => {
                   <button
                     key={index}
                     onClick={() => setSelectedColor(color)}
-                    className={`w-12 h-12 rounded-xl transition-all duration-200 ${
-                      selectedColor === color 
-                        ? 'ring-2 ring-white ring-offset-2 ring-offset-slate-800 scale-110' 
-                        : 'hover:scale-105'
-                    }`}
+                    className={`w-12 h-12 rounded-xl transition-all duration-200 ${selectedColor === color
+                      ? 'ring-2 ring-white ring-offset-2 ring-offset-slate-800 scale-110'
+                      : 'hover:scale-105'
+                      }`}
                     style={{ backgroundColor: color }}
                   />
                 ))}
@@ -151,7 +198,7 @@ const RoomPage = () => {
               <div className="mt-4 p-3 bg-slate-800/50 rounded-xl">
                 <p className="text-sm mb-1">Selected Color</p>
                 <div className="flex items-center gap-2">
-                  <div 
+                  <div
                     className="w-6 h-6 rounded-lg border border-slate-600"
                     style={{ backgroundColor: selectedColor }}
                   />
@@ -165,24 +212,24 @@ const RoomPage = () => {
               <h3 className="text-lg font-semibold mb-4">Room Info</h3>
               <div className="space-y-3">
                 <div className="flex justify-between items-center">
-                  <span className="">Room Key</span>
+                  <span>Room Key</span>
                   <span className="font-mono">{roomKey}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="">Grid Size</span>
-                  <span className="">{gridSize}×{gridSize}</span>
+                  <span>Grid Size</span>
+                  <span>{gridSize}×{gridSize}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="">Colors</span>
-                  <span className="">{colors}</span>
+                  <span>Colors</span>
+                  <span>{colors}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="">Rounds</span>
-                  <span className="">{rounds}</span>
+                  <span>Rounds</span>
+                  <span>{rounds}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="">Online</span>
-                  <span className="text-green-400">1 user</span>
+                  <span>Online</span>
+                  <span className="text-green-400">{room?.players?.length ?? 1}</span>
                 </div>
               </div>
             </div>
