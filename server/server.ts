@@ -23,9 +23,10 @@ type Room = {
   started: boolean;
 };
 const rooms: { [roomKey: string]: Room } = {};
+console.log("Backend restarted. Cleared all rooms.");
 
 io.on("connection", (socket) => {
-  console.log("A user connected:", socket.id);
+  console.log("Connection Established:", socket.id);
 
   // Create room
   socket.on("create-room", ({ name, gridSize, colors, rounds }, cb) => {
@@ -46,11 +47,19 @@ io.on("connection", (socket) => {
     const room = rooms[roomKey];
     if (!room || room.started) return cb({ error: "Room not found or already started" });
 
+    // Remove disconnected sockets
+    room.players = room.players.filter(p => io.sockets.sockets.has(p.id) && p.name !== name);
     room.players.push({ id: socket.id, name });
+
+
     socket.join(roomKey);
     cb({ success: true });
     io.to(roomKey).emit("room-updated", room);
+     console.log(`Room ${roomKey} has ${room.players.length} players`);
+    console.log(room.players);
   });
+
+
 
   // Start game
   socket.on("start-game", (roomKey) => {
@@ -63,18 +72,20 @@ io.on("connection", (socket) => {
 
   // Handle disconnect
   socket.on("disconnect", () => {
-    console.log("Disconnected:", socket.id);
-    for (const [roomKey, room] of Object.entries(rooms)) {
-      room.players = room.players.filter((p) => p.id !== socket.id);
-      if (room.players.length === 0) {
-        delete rooms[roomKey];
-      } else {
-        io.to(roomKey).emit("room-updated", room);
+    setTimeout(() => {
+      for (const [roomKey, room] of Object.entries(rooms)) {
+        room.players = room.players.filter((p) => p.id !== socket.id);
+        if (room.players.length === 0) {
+          delete rooms[roomKey];
+        } else {
+          io.to(roomKey).emit("room-updated", room);
+        }
       }
-    }
+    }, 5000); // wait 5 seconds before deleting room
   });
+
 });
 
 server.listen(4000, () => {
-  console.log("Socket server running on port 3001");
+  console.log("Socket server running on port 4000");
 });
