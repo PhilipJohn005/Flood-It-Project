@@ -1,18 +1,20 @@
 'use client'
 
 import { useParams, useSearchParams, useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState, useRef } from 'react'
 import {
   Copy, Users, Grid3X3, Palette,
-  ArrowLeft, Check, Crown
+  ArrowLeft, Check, Crown, Trophy
 } from 'lucide-react'
 import { getSocket } from '@/lib/socket'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 
 interface Player {
   id: string;
   name: string;
 }
-
+type CellColor = number
 interface Room {
   host: string;
   players: Player[];
@@ -20,23 +22,40 @@ interface Room {
   started: boolean;
 }
 
+const COLORS = [
+  'bg-red-500',
+  'bg-blue-500', 
+  'bg-green-500',
+  'bg-yellow-500',
+  'bg-purple-500',
+  'bg-pink-500',
+  'bg-orange-500',
+  'bg-teal-500'
+];
+
 const RoomPage = () => {
   const { roomKey } = useParams()
   if (!roomKey) return;
   const searchParams = useSearchParams()
   const router = useRouter()
-
   const [room, setRoom] = useState<Room | null>(null)
   const [gridSize, setGridSize] = useState<number>(12)
   const [colors, setColors] = useState<number>(6)
   const [rounds, setRounds] = useState<number>(1)
   const [isLoading, setIsLoading] = useState(true)
-
   const mode = searchParams.get('mode') ?? 'join'
   const name = searchParams.get('name') ?? 'Player'
   const isCreator = mode === 'create'
   const [copied, setCopied] = useState(false)
   const [selectedColor, setSelectedColor] = useState('#EF4444')
+  const [board, setBoard] = useState<CellColor[][]>([])
+  const [moves, setMoves] = useState(0)
+  const [isGameOver, setIsGameOver] = useState(false)
+  const [isPlaying, setIsPlaying] = useState(false)
+  const [currentRound, setCurrentRound] = useState(1)
+  const [score, setScore] = useState(0)
+  const [gameWon, setGameWon] = useState(false)
+  const timerRef = useRef<NodeJS.Timeout | null>(null)
 
   useEffect(() => {
     const socket = getSocket()
@@ -69,32 +88,88 @@ const RoomPage = () => {
       await navigator.clipboard.writeText(roomKey)
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
+      
     }
   }
 
-  const generateColorPalette = (count: number) => {
-    const baseColors = [
-      '#EF4444', '#F97316', '#F59E0B', '#EAB308', '#84CC16', '#22C55E',
-      '#10B981', '#14B8A6', '#06B6D4', '#0EA5E9', '#3B82F6', '#6366F1',
-      '#8B5CF6', '#A855F7', '#D946EF', '#EC4899'
-    ]
-    return baseColors.slice(0, count)
+  const initializeBoard = useCallback(() => {
+    const newBoard: CellColor[][] = []
+    for (let i = 0; i < gridSize; i++) {
+      const row: CellColor[] = []
+      for (let j = 0; j < gridSize; j++) {
+        row.push(Math.floor(Math.random() * colors))
+      }
+      newBoard.push(row)
+    }
+    setBoard(newBoard)
+    setMoves(0)
+    setIsGameOver(false)
+    setIsPlaying(true)
+    setGameWon(false)
+  }, [gridSize, colors])
+
+  const floodFill = (board: CellColor[][], currentStartColor: CellColor, newColor: CellColor, x = 0, y = 0) => {
+    const boundaryOfBoard = gridSize
+    if (x < 0 || y < 0 || x >= boundaryOfBoard || y >= boundaryOfBoard) return
+    if (currentStartColor !== board[x][y] || newColor == board[x][y]) return
+
+    board[x][y] = newColor
+
+    floodFill(board, currentStartColor, newColor, x - 1, y)
+    floodFill(board, currentStartColor, newColor, x, y - 1)
+    floodFill(board, currentStartColor, newColor, x + 1, y)
+    floodFill(board, currentStartColor, newColor, x, y + 1)
   }
 
-  const colorPalette = generateColorPalette(colors)
-  const gridCells = Array(gridSize * gridSize).fill(null)
+  const handleColorClick = (colorIndex: CellColor) => {
+    if (isGameOver || !isPlaying || gameWon) return
+    setSelectedColor(COLORS[colorIndex])
+    const newBoard = board.map(row => [...row])
+    const startColor = newBoard[0][0]
+    
+    floodFill(newBoard, startColor, colorIndex)
+    setBoard(newBoard)
+    
+    const newMoves = moves + 1
+    setMoves(newMoves)
+
+    // Check if game is won (all cells same color)
+    const allSameColor = newBoard.every(row => 
+      row.every(cell => cell === newBoard[0][0])
+    )
+
+    if (allSameColor) {
+      setGameWon(true)
+      const roundScore = Math.max(100 - moves * 5, 10)
+      setScore(score + roundScore)
+      
+      
+    }
+  }
+
+  const nextRound = () => {
+    if (currentRound < rounds) {
+      setCurrentRound(currentRound + 1)
+      initializeBoard()
+    } else {
+      setIsGameOver(true)
+      setIsPlaying(false)
+      
+    }
+  }
+
+  const startGame = () => {
+    initializeBoard()
+    setIsPlaying(true)
+  }
 
   useEffect(() => {
-    setSelectedColor(colorPalette[0])
-  }, [colors])
+    if (gridSize && colors) {
+      initializeBoard()
+    }
+  }, [gridSize, colors, initializeBoard])
 
-  if (isLoading || !room) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-white text-xl font-semibold">Loading room...</div>
-      </div>
-    )
-  }
+  const colorPalette = COLORS.slice(0, colors)
 
   return (
     <div className="min-h-screen p-4">
@@ -102,24 +177,29 @@ const RoomPage = () => {
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
           <div className="flex items-center gap-4">
-            <button
-              onClick={() => router.push('/multi-player')}
-              className="p-2 hover:bg-white/10 rounded-lg transition-colors"
-            >
-              <ArrowLeft size={20} className="" />
-            </button>
-
             <div>
               <div className="flex items-center gap-3 mb-1">
-                <h1 className="text-2xl font-bold ">Room: {roomKey}</h1>
+                <Button 
+                  variant="outline" 
+                  onClick={() => router.push('/multi-player')}
+                  size="sm"
+                  className="mr-2"
+                >
+                  <ArrowLeft className="w-4 h-4 mr-1" />
+                  Leave
+                </Button>
+                <h1 className="text-2xl font-bold">Room: {roomKey}</h1>
                 {isCreator && (
-                  <div className="flex items-center gap-1 bg-yellow-500/20 text-yellow-400 px-2 py-1 rounded-lg text-sm">
-                    <Crown size={14} />
+                  <Badge variant="secondary">
+                    <Crown size={14} className="mr-1" />
                     Creator
-                  </div>
+                  </Badge>
                 )}
+                <Badge variant="secondary">
+                  Round {currentRound}/{rounds}
+                </Badge>
               </div>
-              <div className="flex items-center gap-4 text-sm ">
+              <div className="flex items-center gap-4 text-sm">
                 <span className="flex items-center gap-1">
                   <Grid3X3 size={16} />
                   {gridSize}x{gridSize}
@@ -130,48 +210,54 @@ const RoomPage = () => {
                 </span>
                 <span className="flex items-center gap-1">
                   <Users size={16} />
-                  {room?.players?.length ?? 1} online
+                  {room?.players?.length ?? 1} Joined
                 </span>
+                <span>Score: {score}</span>
+                <span>Moves: {moves}</span>
               </div>
-              <button className='px-4 py-2 bg-red-400 cursor-pointer hover:bg-red-500 rounded-md'>
-                Start
-              </button>
+              {!isPlaying && (
+                <Button 
+                  onClick={startGame}
+                  className="mt-2"
+                >
+                  Start Game
+                </Button>
+              )}
             </div>
           </div>
 
-          <button
+          <Button
             onClick={copyRoomKey}
-            className="flex items-center gap-2 bg-white/10 hover:bg-white/20 px-4 py-2 rounded-xl transition-colors"
+            variant="outline"
           >
-            {copied ? <Check size={16} /> : <Copy size={16} />}
+            {copied ? <Check size={16} className="mr-1" /> : <Copy size={16} className="mr-1" />}
             {copied ? 'Copied!' : 'Share Room Key'}
-          </button>
+          </Button>
         </div>
 
         <div className="grid lg:grid-cols-4 gap-6">
-          {/* Canvas */}
+          {/* Board */}
           <div className="lg:col-span-3">
             <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10">
-              <h2 className="text-xl font-semibold mb-4">Canvas</h2>
-
-              <div className="bg-white rounded-xl p-4 overflow-auto">
-                <div
+              <div className="p-4 rounded border overflow-auto">
+                <div 
                   className="grid gap-1 mx-auto"
-                  style={{
+                  style={{ 
                     gridTemplateColumns: `repeat(${gridSize}, 1fr)`,
-                    width: 'fit-content',
-                    maxWidth: '100%'
+                    maxWidth: `${Math.min(400, gridSize * 20)}px`
                   }}
                 >
-                  {gridCells.map((_, index) => (
-                    <div
-                      key={index}
-                      className="w-6 h-6 bg-gray-100 border border-gray-200 cursor-pointer hover:bg-gray-200 transition-colors rounded-sm"
-                      onClick={() => {
-                        console.log(`Coloring pixel ${index} with ${selectedColor}`)
-                      }}
-                    />
-                  ))}
+                  {board.map((row, i) => 
+                    row.map((cell, j) => (
+                      <div
+                        key={`${i}-${j}`}
+                        className={`aspect-square rounded ${COLORS[cell]} ${
+                          i === 0 && j === 0 ? 'ring-2 ring-black' : ''
+                        }`}
+                        style={{ minWidth: '12px', minHeight: '12px' }}
+                      />
+                    ))
+                  )}
                 </div>
               </div>
             </div>
@@ -182,30 +268,53 @@ const RoomPage = () => {
             {/* Color Palette */}
             <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10">
               <h3 className="text-lg font-semibold mb-4">Color Palette</h3>
-              <div className="grid grid-cols-4 gap-2">
+              <div className="flex justify-center space-x-2 p-3 bg-gray-50 rounded border">
                 {colorPalette.map((color, index) => (
                   <button
                     key={index}
-                    onClick={() => setSelectedColor(color)}
-                    className={`w-12 h-12 rounded-xl transition-all duration-200 ${selectedColor === color
-                      ? 'ring-2 ring-white ring-offset-2 ring-offset-slate-800 scale-110'
-                      : 'hover:scale-105'
-                      }`}
-                    style={{ backgroundColor: color }}
+                    onClick={() => handleColorClick(index)}
+                    disabled={gameWon}
+                    className={`w-8 h-8 rounded ${color} border-2 border-gray-300 hover:border-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:scale-105 ${
+                      board[0]?.[0] === index ? 'ring-2 ring-black' : ''
+                    }`}
                   />
                 ))}
               </div>
-              <div className="mt-4 p-3 bg-slate-800/50 rounded-xl">
-                <p className="text-sm mb-1">Selected Color</p>
-                <div className="flex items-center gap-2">
-                  <div
-                    className="w-6 h-6 rounded-lg border border-slate-600"
-                    style={{ backgroundColor: selectedColor }}
-                  />
-                  <span className="text-sm font-mono">{selectedColor}</span>
-                </div>
-              </div>
             </div>
+
+            {/* Game Status */}
+            {gameWon && (
+              <div className="text-center space-y-3 p-4 border rounded bg-green-50">
+                <p className="text-lg font-bold text-green-600">
+                  🎉 Round {currentRound} Complete!
+                </p>
+                <p className="text-sm text-gray-600">
+                  Completed in {moves} moves!
+                </p>
+                {currentRound < rounds ? (
+                  <Button 
+                    onClick={nextRound}
+                    className="bg-green-600 hover:bg-green-700"
+                  >
+                    <Trophy className="w-4 h-4 mr-1" />
+                    Next Round
+                  </Button>
+                ) : (
+                  <div className="space-y-2">
+                    <p className="text-lg font-bold text-purple-600">
+                      🏆 Game Complete!
+                    </p>
+                    <p className="text-sm">Final Score: {score} points</p>
+                    <Button 
+                      onClick={initializeBoard}
+                      variant="outline"
+                    >
+                      Play Again
+                    </Button>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Room Info */}
             <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10">
@@ -236,12 +345,12 @@ const RoomPage = () => {
 
             {/* Instructions */}
             <div className="bg-gradient-to-br from-purple-600/10 to-pink-600/10 border border-purple-500/20 rounded-2xl p-6">
-              <h3 className="text-lg font-semibold mb-3">How to Use</h3>
-              <div className="space-y-2 text-sm ">
+              <h3 className="text-lg font-semibold mb-3">How to Play</h3>
+              <div className="space-y-2 text-sm">
                 <p>• Select a color from the palette</p>
-                <p>• Click on canvas cells to paint</p>
-                <p>• Share the room key with friends</p>
-                <p>• Collaborate in real-time</p>
+                <p>• Flood the entire board with one color</p>
+                <p>• Complete all rounds to win</p>
+                <p>• Fewer moves = higher score</p>
               </div>
             </div>
           </div>
