@@ -56,6 +56,12 @@ const RoomPage = () => {
   const [score, setScore] = useState(0)
   const [gameWon, setGameWon] = useState(false)
   const timerRef = useRef<NodeJS.Timeout | null>(null)
+  const [gameStartRequested, setGameStartRequested] = useState(false)
+
+const handleGameStart = () => {
+  setGameStartRequested(true)
+  setIsPlaying(true)
+}
 
   useEffect(() => {
     const socket = getSocket()
@@ -76,10 +82,17 @@ const RoomPage = () => {
       setIsLoading(false)
     }
 
-    socket.on('room-updated', handleUpdate)
+    const handleGameStart=()=>{
+      setGameStartRequested(true)
+      setIsPlaying(true)
+    }
 
+    socket.on('room-updated', handleUpdate)
+    socket.on("game-started",handleGameStart);
     return () => {
       socket.off('room-updated', handleUpdate)
+      socket.off("game-started",handleGameStart);
+
     }
   }, [roomKey, name])
 
@@ -91,6 +104,14 @@ const RoomPage = () => {
       
     }
   }
+
+  useEffect(() => {
+    if (gameStartRequested && room) {
+      initializeBoard()
+      setGameStartRequested(false)
+    }
+  }, [gameStartRequested, room])
+
 
   const initializeBoard = useCallback(() => {
     const newBoard: CellColor[][] = []
@@ -158,16 +179,14 @@ const RoomPage = () => {
     }
   }
 
-  const startGame = () => {
-    initializeBoard()
-    setIsPlaying(true)
-  }
-
-  useEffect(() => {
-    if (gridSize && colors) {
-      initializeBoard()
+    const startGame = () => {
+      if(!gridSize && colors)return;
+      const socket=getSocket();
+      socket.emit("start-game",roomKey)
     }
-  }, [gridSize, colors, initializeBoard])
+
+
+
 
   const colorPalette = COLORS.slice(0, colors)
 
@@ -215,7 +234,7 @@ const RoomPage = () => {
                 <span>Score: {score}</span>
                 <span>Moves: {moves}</span>
               </div>
-              {!isPlaying && (
+              {!isPlaying && isCreator &&(
                 <Button 
                   onClick={startGame}
                   className="mt-2"
@@ -223,7 +242,10 @@ const RoomPage = () => {
                   Start Game
                 </Button>
               )}
-            </div>
+              {!isPlaying && !isCreator && (
+                <p className="text-sm text-gray-500 mt-2">Waiting for host to start the game...</p>
+              )}
+            </div>  
           </div>
 
           <Button
