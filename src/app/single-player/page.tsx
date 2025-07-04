@@ -218,15 +218,15 @@ const GameBoard = ({ onBack }: GameBoardProps) => {
           <div className="flex justify-center space-x-4 text-sm">
             <div className="text-center">
               <div className="font-bold text-lg">{moves}</div>
-              <div className="text-gray-600">Moves</div>
+              <div className="">Moves</div>
             </div>
             <div className="text-center">
               <div className="font-bold text-lg">{currentLevelConfig.boardSize}x{currentLevelConfig.boardSize}</div>
-              <div className="text-gray-600">Board</div>
+              <div className="">Board</div>
             </div>
             <div className="text-center">
               <div className="font-bold text-lg">{currentLevelConfig.colors}</div>
-              <div className="text-gray-600">Colors</div>
+              <div className="">Colors</div>
             </div>
           </div>
 
