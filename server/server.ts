@@ -47,17 +47,15 @@ io.on("connection", (socket) => {
     const room = rooms[roomKey];
     if (!room || room.started) return cb({ error: "Room not found or already started" });
 
-    // Remove disconnected sockets
-    room.players = room.players.filter(p => io.sockets.sockets.has(p.id) && p.name !== name);
+          //if current guy name is present and also the socket is not connected then we remove them
+      room.players = room.players.filter(p => io.sockets.sockets.has(p.id) && p.name !== name); //romving...those who is true is taken...false are removed
+
     room.players.push({ id: socket.id, name });
-
-
     socket.join(roomKey);
     cb({ success: true });
     io.to(roomKey).emit("room-updated", room);
-     console.log(`Room ${roomKey} has ${room.players.length} players`);
-    console.log(room.players);
   });
+
 
 
 

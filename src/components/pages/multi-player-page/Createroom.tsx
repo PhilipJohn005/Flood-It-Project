@@ -8,7 +8,7 @@ import io from 'socket.io-client';
 import { getSocket } from '@/lib/socket'
 
 const Createroom = () => {
-  const [gridSize,setGridSize]=useState(3);
+  const [gridSize,setGridSize]=useState(6);
   const [colorCount,setColorCount]=useState(3);
   const [rounds,setRounds]=useState(1);
   const [name,setName]=useState('');
@@ -64,14 +64,14 @@ const Createroom = () => {
                 <input
                   type="range"
                   min="6"
-                  max="32"
+                  max="16"
                   value={gridSize}
                   onChange={(e) => setGridSize(Number(e.target.value))}
                   className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer slider"
                 />
                 <div className="flex justify-between text-xs">
                   <span>6×6</span>
-                  <span>32×32</span>
+                  <span>16x16</span>
                 </div>
               </div>
 
@@ -83,14 +83,14 @@ const Createroom = () => {
                 <input
                   type="range"
                   min="3"
-                  max="16"
+                  max="8"
                   value={colorCount}
                   onChange={(e) => setColorCount(Number(e.target.value))}
                   className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer slider"
                 />
                 <div className="flex justify-between text-xs">
                   <span>3 colors</span>
-                  <span>16 colors</span>
+                  <span>8 colors</span>
                 </div>
               </div>
 
@@ -101,14 +101,14 @@ const Createroom = () => {
                 <input
                   type="range"
                   min="1"
-                  max="20"
+                  max="10"
                   value={rounds}
                   onChange={(e:React.ChangeEvent<HTMLInputElement>) => setRounds(Number(e.target.value))}
                   className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer slider"
                 />
                 <div className="flex justify-between text-xs">
                   <span>1 round</span>
-                  <span>20 round</span>
+                  <span>10 round</span>
                 </div>
               </div>
 
