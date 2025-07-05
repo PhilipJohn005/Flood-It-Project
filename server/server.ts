@@ -23,7 +23,12 @@ type Room = {
   started: boolean;
 };
 const rooms: { [roomKey: string]: Room } = {};
+
+
 console.log("Backend restarted. Cleared all rooms.");
+
+const roomStats: { [roomKey: string]: any[] } = {};
+
 
 io.on("connection", (socket) => {
   console.log("Connection Established:", socket.id);
@@ -56,8 +61,17 @@ io.on("connection", (socket) => {
     io.to(roomKey).emit("room-updated", room);
   });
 
+  socket.on("player-finished",({roomKey,playerId,name,moves,time,score})=>{
+    if(!roomStats[roomKey])roomStats[roomKey]=[];
+    roomStats[roomKey].push({id:playerId,name,moves,time,score});
 
+    const numOfPlayers=io.sockets.adapter.rooms.get(roomKey)?.size || 0  //how many are currently playing
 
+    if(roomStats[roomKey].length===numOfPlayers){
+      io.to(roomKey).emit("leaderboard-update",roomStats[roomKey]);
+      delete roomStats[roomKey];
+    }
+  })
 
   // Start game
   socket.on("start-game", (roomKey) => {

@@ -1,5 +1,9 @@
 'use client'
 
+import Header from '@/components/pages/game-page/Header'
+import RoomInfo from '@/components/pages/game-page/RoomInfo'
+import Instructions from '@/components/pages/game-page/Instructions'
+import Board from '@/components/pages/game-page/Board'
 import { useParams, useSearchParams, useRouter } from 'next/navigation'
 import { useCallback, useEffect, useState, useRef } from 'react'
 import {
@@ -9,6 +13,7 @@ import {
 import { getSocket } from '@/lib/socket'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+
 
 interface Player {
   id: string;
@@ -57,10 +62,17 @@ const RoomPage = () => {
   const [gameWon, setGameWon] = useState(false)
   const timerRef = useRef<NodeJS.Timeout | null>(null)
   const [gameStartRequested, setGameStartRequested] = useState(false)
-
-const handleGameStart = () => {
-  setGameStartRequested(true)
-  setIsPlaying(true)
+  const [startTime,setStartTime]=useState(0);
+  const [endTime,setEndTime]=useState(0);
+  const [liveElapsed, setLiveElapsed] = useState(0);
+  const [leaderboard, setLeaderboard] = useState<PlayerStats[]>([])
+  const [timeTaken,setTimeTaken]=useState(0);
+interface PlayerStats {
+  id: string;
+  name: string;
+  moves: number;
+  time: number; // in ms
+  score: number;
 }
 
   useEffect(() => {
@@ -87,31 +99,47 @@ const handleGameStart = () => {
       setIsPlaying(true)
     }
 
+    const handleLeaderboard=(stats:PlayerStats[])=>{
+      const sorted = stats.sort((a, b) => {
+        return a.moves - b.moves || a.time - b.time;
+      })
+      setLeaderboard(sorted);
+    }
+
     socket.on('room-updated', handleUpdate)
     socket.on("game-started",handleGameStart);
+    socket.on("leaderboard-update",handleLeaderboard);
     return () => {
       socket.off('room-updated', handleUpdate)
       socket.off("game-started",handleGameStart);
-
+      socket.off("leaderboard-update",handleLeaderboard)
     }
   }, [roomKey, name])
 
-  const copyRoomKey = async () => {
-    if (roomKey && typeof roomKey === 'string') {
-      await navigator.clipboard.writeText(roomKey)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
-      
-    }
-  }
 
-  useEffect(() => {
+  useEffect(() => {    //here is where it starts
     if (gameStartRequested && room) {
       initializeBoard()
       setGameStartRequested(false)
+       const now = Date.now();
+      setStartTime(now);
+      setLiveElapsed(0);
+      setEndTime(0);
+      setTimeTaken(0);
+
+      if (timerRef.current) clearInterval(timerRef.current);
+
+      timerRef.current = setInterval(() => {
+        setLiveElapsed(Date.now() - now);
+      }, 100);
     }
   }, [gameStartRequested, room])
 
+  const formatTime = (ms: number) => {
+    const s = Math.floor(ms / 1000);
+    const msLeft = ms % 1000;
+    return `${s}.${msLeft.toString().padStart(3, '0')}s`;
+  };
 
   const initializeBoard = useCallback(() => {
     const newBoard: CellColor[][] = []
@@ -123,7 +151,6 @@ const handleGameStart = () => {
       newBoard.push(row)
     }
     setBoard(newBoard)
-    setMoves(0)
     setIsGameOver(false)
     setIsPlaying(true)
     setGameWon(false)
@@ -141,6 +168,7 @@ const handleGameStart = () => {
     floodFill(board, currentStartColor, newColor, x + 1, y)
     floodFill(board, currentStartColor, newColor, x, y + 1)
   }
+
 
   const handleColorClick = (colorIndex: CellColor) => {
     if (isGameOver || !isPlaying || gameWon) return
@@ -162,9 +190,29 @@ const handleGameStart = () => {
     if (allSameColor) {
       setGameWon(true)
       const roundScore = Math.max(100 - moves * 5, 10)
-      setScore(score + roundScore)
-      
-      
+      setScore(score + roundScore)  
+      if (currentRound === rounds) {
+        if (timerRef.current) {
+          clearInterval(timerRef.current)
+          timerRef.current = null
+        }
+        const now = Date.now();
+        const totalTime = now - startTime;
+        setEndTime(now);
+        setTimeTaken(totalTime);
+        setIsGameOver(true);
+        setIsPlaying(false);
+        
+        const socket = getSocket();
+        socket.emit("player-finished", {
+          roomKey,
+          playerId: socket.id,
+          name,
+          moves,
+          time: totalTime,
+          score
+        });
+      }  
     }
   }
 
@@ -175,17 +223,14 @@ const handleGameStart = () => {
     } else {
       setIsGameOver(true)
       setIsPlaying(false)
-      
-    }
   }
+}
 
     const startGame = () => {
-      if(!gridSize && colors)return;
-      const socket=getSocket();
-      socket.emit("start-game",roomKey)
+      if (!gridSize || !colors) return;
+      const socket = getSocket();
+      socket.emit("start-game", roomKey);
     }
-
-
 
 
   const colorPalette = COLORS.slice(0, colors)
@@ -194,96 +239,11 @@ const handleGameStart = () => {
     <div className="min-h-screen p-4">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
-          <div className="flex items-center gap-4">
-            <div>
-              <div className="flex items-center gap-3 mb-1">
-                <Button 
-                  variant="outline" 
-                  onClick={() => router.push('/multi-player')}
-                  size="sm"
-                  className="mr-2"
-                >
-                  <ArrowLeft className="w-4 h-4 mr-1" />
-                  Leave
-                </Button>
-                <h1 className="text-2xl font-bold">Room: {roomKey}</h1>
-                {isCreator && (
-                  <Badge variant="secondary">
-                    <Crown size={14} className="mr-1" />
-                    Creator
-                  </Badge>
-                )}
-                <Badge variant="secondary">
-                  Round {currentRound}/{rounds}
-                </Badge>
-              </div>
-              <div className="flex items-center gap-4 text-sm">
-                <span className="flex items-center gap-1">
-                  <Grid3X3 size={16} />
-                  {gridSize}x{gridSize}
-                </span>
-                <span className="flex items-center gap-1">
-                  <Palette size={16} />
-                  {colors} colors
-                </span>
-                <span className="flex items-center gap-1">
-                  <Users size={16} />
-                  {room?.players?.length ?? 1} Joined
-                </span>
-                <span>Score: {score}</span>
-                <span>Moves: {moves}</span>
-              </div>
-              {!isPlaying && isCreator &&(
-                <Button 
-                  onClick={startGame}
-                  className="mt-2"
-                >
-                  Start Game
-                </Button>
-              )}
-              {!isPlaying && !isCreator && (
-                <p className="text-sm text-gray-500 mt-2">Waiting for host to start the game...</p>
-              )}
-            </div>  
-          </div>
-
-          <Button
-            onClick={copyRoomKey}
-            variant="outline"
-          >
-            {copied ? <Check size={16} className="mr-1" /> : <Copy size={16} className="mr-1" />}
-            {copied ? 'Copied!' : 'Share Room Key'}
-          </Button>
-        </div>
+        <Header roomKey={roomKey} startGame={startGame} liveElapsed={liveElapsed} isCreator={isCreator} currentRound={currentRound} rounds={rounds} gridSize={gridSize} colors={colors} room={room} score={score} moves={moves} isPlaying={isPlaying}/>
 
         <div className="grid lg:grid-cols-4 gap-6">
           {/* Board */}
-          <div className="lg:col-span-3">
-            <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10">
-              <div className="p-4 rounded border overflow-auto">
-                <div 
-                  className="grid gap-1 mx-auto"
-                  style={{ 
-                    gridTemplateColumns: `repeat(${gridSize}, 1fr)`,
-                    maxWidth: `${Math.min(400, gridSize * 20)}px`
-                  }}
-                >
-                  {board.map((row, i) => 
-                    row.map((cell, j) => (
-                      <div
-                        key={`${i}-${j}`}
-                        className={`aspect-square rounded ${COLORS[cell]} ${
-                          i === 0 && j === 0 ? 'ring-2 ring-black' : ''
-                        }`}
-                        style={{ minWidth: '12px', minHeight: '12px' }}
-                      />
-                    ))
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
+          <Board gridSize={gridSize} board={board} COLORS={COLORS}/>
 
           {/* Right panel */}
           <div className="space-y-6">
@@ -327,54 +287,35 @@ const handleGameStart = () => {
                       🏆 Game Complete!
                     </p>
                     <p className="text-sm">Final Score: {score} points</p>
-                    <Button 
-                      onClick={initializeBoard}
-                      variant="outline"
-                    >
-                      Play Again
-                    </Button>
+                      <p className="text-sm">Total Moves: <span className="font-mono">{moves}</span></p>
+                      <p className="text-sm">Total Time: <span>Time: {formatTime(isGameOver ? timeTaken : liveElapsed)}</span></p>
+                      <Button onClick={initializeBoard} variant="outline">
+                        Play Again
+                      </Button>
+                  </div>
+                )}
+                {isGameOver && leaderboard.length > 0 && (
+                  <div className="bg-white/10 p-4 mt-4 rounded-xl border border-white/20">
+                    <h2 className="text-lg font-semibold mb-2">🏆 Leaderboard</h2>
+                    <div className="text-sm space-y-2">
+                      {leaderboard.map((player, idx) => (
+                        <div key={player.id} className="flex justify-between">
+                          <span>{idx + 1}. {player.name}</span>
+                          <span className="font-mono">
+                            {player.score} pts – {player.moves} moves – {formatTime(player.time)}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>
             )}
 
             {/* Room Info */}
-            <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10">
-              <h3 className="text-lg font-semibold mb-4">Room Info</h3>
-              <div className="space-y-3">
-                <div className="flex justify-between items-center">
-                  <span>Room Key</span>
-                  <span className="font-mono">{roomKey}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span>Grid Size</span>
-                  <span>{gridSize}×{gridSize}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span>Colors</span>
-                  <span>{colors}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span>Rounds</span>
-                  <span>{rounds}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span>Online</span>
-                  <span className="text-green-400">{room?.players?.length ?? 1}</span>
-                </div>
-              </div>
-            </div>
-
+            <RoomInfo roomKey={roomKey} gridSize={gridSize} colors={colors} rounds={rounds} room={room}/>
             {/* Instructions */}
-            <div className="bg-gradient-to-br from-purple-600/10 to-pink-600/10 border border-purple-500/20 rounded-2xl p-6">
-              <h3 className="text-lg font-semibold mb-3">How to Play</h3>
-              <div className="space-y-2 text-sm">
-                <p>• Select a color from the palette</p>
-                <p>• Flood the entire board with one color</p>
-                <p>• Complete all rounds to win</p>
-                <p>• Fewer moves = higher score</p>
-              </div>
-            </div>
+            <Instructions/>
           </div>
         </div>
       </div>
