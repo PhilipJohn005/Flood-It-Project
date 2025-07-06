@@ -4,7 +4,7 @@ import React from 'react'
 import { getSocket } from '@/lib/socket'
 import { useState, useEffect } from 'react'
 import { Card,CardContent,CardHeader,CardTitle } from '@/components/ui/card'
-
+import { Crown,Medal } from 'lucide-react'
 
 const LeaderboardPage = () => {
   const [boardSize, setBoardSize] = useState("6x6");
@@ -23,9 +23,9 @@ const LeaderboardPage = () => {
 
   const getRankIcon = (rank: number) => {
     switch (rank) {
-      case 1: return "🥇";
-      case 2: return "🥈";
-      case 3: return "🥉";
+      case 1: return <Crown />;
+      case 2: return <Medal />;
+      case 3: return <Medal />;
       default: return `#${rank}`;
     }
   };
