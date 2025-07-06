@@ -12,6 +12,7 @@
     "dev:fullstack": "concurrently --names \"FRONTEND,BACKEND\" --prefix \"[{name}]\" --prefix-colors \"bgBlue.bold,bgMagenta.bold\" \"npm run dev\" \"npm run server\""
   },
   "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.840.0",
     "@radix-ui/react-slot": "^1.2.3",
     "@types/jsonwebtoken": "^9.0.10",
     "aws-sdk": "^2.1692.0",
