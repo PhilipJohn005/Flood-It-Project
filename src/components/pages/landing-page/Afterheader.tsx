@@ -72,13 +72,15 @@ const Afterheader = () => {
                 </Button>
               </Link>
               <div className="grid grid-cols-2 gap-3 col-span-2">
+                <Link href={"/leaderboard"}>
                 <Button
                   variant="outline"
-                  className="h-12"
+                  className="h-12 w-full"
                 >
                   <Trophy className="w-5 h-5 mr-2" />
                   Leaderboard
                 </Button>
+                </Link>
                 <Button
                   variant="outline"
                   className="h-12"

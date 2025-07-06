@@ -3,6 +3,8 @@ import http from "http";
 import { Server } from "socket.io";
 import { nanoid } from "nanoid";
 import cors from "cors";
+import { DynamoDBClient, PutItemCommand,QueryCommand  } from "@aws-sdk/client-dynamodb";
+ 
 
 const app = express();
 app.use(cors());
@@ -12,7 +14,9 @@ const io = new Server(server, {
   cors: {
     origin: "*", // use actual frontend domain in prod
   },
-});  //
+});
+
+const dynamo=new DynamoDBClient({region:"eu-north-1"})
 
 // In-memory room store
 type Player = { id: string; name: string };
@@ -61,9 +65,41 @@ io.on("connection", (socket) => {
     io.to(roomKey).emit("room-updated", room);
   });
 
-  socket.on("player-finished",({roomKey,playerId,name,moves,time,score})=>{
+
+
+  socket.on("player-finished",async({roomKey,playerId,name,moves,time})=>{
+      const room = rooms[roomKey];
+
     if(!roomStats[roomKey])roomStats[roomKey]=[];
+
+    const { colors,gridSize } = room.settings;
+
+    const colorWeight = 1 + (colors - 4) * 0.1;
+    const timeWeight = 0.05;
+
+    const timeInSeconds = time / 1000;
+    const score = (moves * colorWeight) + (timeInSeconds * timeWeight);
     roomStats[roomKey].push({id:playerId,name,moves,time,score});
+
+    const boardSize=`${gridSize}x${gridSize}`
+    const dynamoParams={
+      TableName:"Flood-It-Leaderboard",
+      Item:{
+        boardSize:{S:boardSize},
+        score:{N:score.toFixed(3)},
+        username:{S:name},
+        playerId: { S: playerId },
+        moves: { N: moves.toString() },
+        time: { N: time.toString() },
+        timestamp: { N: Date.now().toString() },
+      }}
+
+      try{
+        await dynamo.send(new PutItemCommand(dynamoParams));
+        console.log("Success in inserting to DynamoDB");
+      }catch(e){
+        console.log("Error occured while inserting to dynamoDB"+e)
+      }
 
     const numOfPlayers=io.sockets.adapter.rooms.get(roomKey)?.size || 0  //how many are currently playing
 
@@ -72,6 +108,35 @@ io.on("connection", (socket) => {
       delete roomStats[roomKey];
     }
   })
+
+  socket.on("get-leaderboard", async ({ boardSize, limit = 10 }, cb) => {
+  const queryParams = {
+    TableName: "Flood-It-Leaderboard",
+    IndexName: "ScoreIndex", // Name of the GSI
+    KeyConditionExpression: "boardSize = :boardSize",
+    ExpressionAttributeValues: {
+      ":boardSize": { S: boardSize }
+    },
+    ScanIndexForward: true, // ascending order (lower score = better)
+    Limit: limit
+  };
+
+  try {
+    const data = await dynamo.send(new QueryCommand(queryParams));
+    const results = (data.Items || []).map(item => ({
+      name: item.username.S,
+      moves: Number(item.moves.N),
+      time: Number(item.time.N),
+      score: Number(item.score.N),
+    }));
+    cb({ success: true, leaderboard: results });
+  } catch (err) {
+    console.error("Error querying leaderboard:", err);
+    cb({ success: false, error: "Failed to fetch leaderboard" });
+  }
+});
+
+
 
   // Start game
   socket.on("start-game", (roomKey) => {
