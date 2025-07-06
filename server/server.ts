@@ -12,7 +12,7 @@ const io = new Server(server, {
   cors: {
     origin: "*", // use actual frontend domain in prod
   },
-});
+});  //
 
 // In-memory room store
 type Player = { id: string; name: string };
