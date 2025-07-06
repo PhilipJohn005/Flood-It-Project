@@ -141,7 +141,7 @@ interface PlayerStats {
     return `${s}.${msLeft.toString().padStart(3, '0')}s`;
   };
 
-  const initializeBoard = useCallback(() => {
+  const initializeBoard = useCallback(() => {   //use callback will only render when required
     const newBoard: CellColor[][] = []
     for (let i = 0; i < gridSize; i++) {
       const row: CellColor[] = []

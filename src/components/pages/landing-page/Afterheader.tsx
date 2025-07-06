@@ -6,12 +6,6 @@ import Link from "next/link";
 
 const Afterheader = () => {
     
-    const ShowLeaderboard=()=>{
-
-    }
-    const ShowSettings=()=>{
-
-    }
 
   return (
     <div className="min-h-screen">
@@ -81,7 +75,6 @@ const Afterheader = () => {
                 <Button
                   variant="outline"
                   className="h-12"
-                  onClick={ShowLeaderboard}
                 >
                   <Trophy className="w-5 h-5 mr-2" />
                   Leaderboard
@@ -89,7 +82,6 @@ const Afterheader = () => {
                 <Button
                   variant="outline"
                   className="h-12"
-                  onClick={ShowSettings}
                 >
                   <Settings className="w-5 h-5 mr-2" />
                   Settings
