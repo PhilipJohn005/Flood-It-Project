@@ -210,7 +210,7 @@ interface PlayerStats {
           name,
           moves,
           time: totalTime,
-          score
+          
         });
       }  
     }
