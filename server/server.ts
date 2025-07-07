@@ -128,6 +128,8 @@ io.on("connection", (socket) => {
       moves: Number(item.moves.N),
       time: Number(item.time.N),
       score: Number(item.score.N),
+      boardSize:item.boardSize.S,
+      playerId:Number(item.playerId.N),       
     }));
     cb({ success: true, leaderboard: results });
   } catch (err) {
