@@ -40,7 +40,7 @@ const LEVELS = [
   { level: 6, boardSize: 10, colors: 7, timeLimit: 54, name: "x" },
   { level: 7, boardSize: 10, colors: 8, timeLimit: 45, name: "xl" },
 ];
-const GameBoard = ({ onBack }: GameBoardProps) => {
+const GameBoard = () => {
   const [currentLevel, setCurrentLevel] = useState(1);
   const [board, setBoard] = useState<CellColor[][]>([]);
   const [moves, setMoves] = useState(0);
@@ -181,7 +181,6 @@ const GameBoard = ({ onBack }: GameBoardProps) => {
           <div className="flex items-center justify-between">
             <Button 
               variant="outline" 
-              onClick={onBack}
               size="sm"
               className="text-xs sm:text-sm"
             >
