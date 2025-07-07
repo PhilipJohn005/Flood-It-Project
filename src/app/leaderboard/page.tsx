@@ -8,9 +8,6 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 
-interface LeaderboardProps {
-  onBack: () => void;
-}
 
 interface Player {
   rank: number;
@@ -43,7 +40,7 @@ const getRankIcon = (rank: number) => {
   }
 };
 
-const Leaderboard = ({ onBack }: LeaderboardProps) => {
+const Leaderboard = () => {
   const [selectedBoard, setSelectedBoard] = useState("8x8");
   const [data, setData] = useState<{ [key: string]: Player[] }>({});
   const [loading, setLoading] = useState(false);
@@ -80,7 +77,7 @@ const Leaderboard = ({ onBack }: LeaderboardProps) => {
       <Card className="bg-white shadow-lg">
         <CardHeader className="pb-4">
           <div className="flex items-center justify-between">
-            <Button variant="outline" onClick={onBack} size="sm">
+            <Button variant="outline" size="sm">
               ← Back
             </Button>
             <CardTitle className="flex items-center space-x-2">
