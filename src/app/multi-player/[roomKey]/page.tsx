@@ -8,7 +8,7 @@ import { useParams, useSearchParams, useRouter } from 'next/navigation'
 import { useCallback, useEffect, useState, useRef } from 'react'
 import {
   Copy, Users, Grid3X3, Palette,
-  ArrowLeft, Check, Crown, Trophy
+  ArrowLeft, Check, Crown, Trophy,PartyPopper,Loader,LoaderCircle
 } from 'lucide-react'
 import { getSocket } from '@/lib/socket'
 import { Button } from '@/components/ui/button'
@@ -117,11 +117,12 @@ interface PlayerStats {
   }, [roomKey, name])
 
 
-  useEffect(() => {    //here is where it starts
+  useEffect(() => {    //here is where it starts---------------gamestartrequested
     if (gameStartRequested && room) {
       initializeBoard()
       setGameStartRequested(false)
-       const now = Date.now();
+      
+      const now = Date.now();
       setStartTime(now);
       setLiveElapsed(0);
       setEndTime(0);
@@ -155,6 +156,7 @@ interface PlayerStats {
     setIsPlaying(true)
     setGameWon(false)
   }, [gridSize, colors])
+
 
   const floodFill = (board: CellColor[][], currentStartColor: CellColor, newColor: CellColor, x = 0, y = 0) => {
     const boundaryOfBoard = gridSize
@@ -201,7 +203,7 @@ interface PlayerStats {
         setEndTime(now);
         setTimeTaken(totalTime);
         setIsGameOver(true);
-        setIsPlaying(false);
+       
         
         const socket = getSocket();
         socket.emit("player-finished", {
@@ -222,7 +224,6 @@ interface PlayerStats {
       initializeBoard()
     } else {
       setIsGameOver(true)
-      setIsPlaying(false)
   }
 }
 
@@ -241,14 +242,12 @@ interface PlayerStats {
         {/* Header */}
         <Header roomKey={roomKey} startGame={startGame} liveElapsed={liveElapsed} isCreator={isCreator} currentRound={currentRound} rounds={rounds} gridSize={gridSize} colors={colors} room={room} score={score} moves={moves} isPlaying={isPlaying}/>
 
-        <div className="grid lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-6">
           {/* Board */}
-          <Board gridSize={gridSize} board={board} COLORS={COLORS}/>
-
-          {/* Right panel */}
-          <div className="space-y-6">
-            {/* Color Palette */}
-            <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10">
+          <div>
+            <Board gridSize={gridSize} board={board} COLORS={COLORS}/>
+            
+                <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10">
               <h3 className="text-lg font-semibold mb-4">Color Palette</h3>
               <div className="flex justify-center space-x-2 p-3 bg-gray-50 rounded border">
                 {colorPalette.map((color, index) => (
@@ -263,12 +262,55 @@ interface PlayerStats {
                 ))}
               </div>
             </div>
+          </div>
+          
+          {/* Right panel */}
+          <div className="space-y-6">
+            {/* Color Palette */}
+            
+                <div className="bg-white/10 p-4 mt-4 rounded-xl border border-white/20">
+                    <div className='flex justify-center items-center py-4'>
+                      <Trophy className='w-6 h-6 text-yellow-300' />
+                      <span className='px-2'>Leaderboard</span>
+                    </div>
 
+                    {
+                      isPlaying ?(
+                        <div>   
+                        {
+                          leaderboard.length>0 ? (
+                            <div className="text-sm space-y-2">
+                              {leaderboard.map((player, idx) => (
+                                  <div key={player.id} className="flex justify-between">
+                                    <span>{idx + 1}. {player.name}</span>
+                                    <span className="font-mono">
+                                      {player.score} pts – {player.moves} moves – {formatTime(player.time)}
+                                    </span>
+                                  </div>
+                              ))}
+                            </div>
+                          ): (
+                            <div className='flex flex-col items-center'>
+                              <LoaderCircle className='animate-spin'/>
+                              <h1>Waiting for All players to finish...</h1> 
+                            </div>
+                          )
+                        }
+                        </div>
+                      ): (
+                        <div className='flex justify-center'>
+                          <h1>Waiting For Players to start</h1>
+                        </div>
+                      )
+                    }    
+
+                  </div>
+               
             {/* Game Status */}
             {gameWon && (
-              <div className="text-center space-y-3 p-4 border rounded bg-green-50">
+              <div className="text-center space-y-3 p-4 border rounded">
                 <p className="text-lg font-bold text-green-600">
-                  🎉 Round {currentRound} Complete!
+                  <span><PartyPopper/></span> Round {currentRound} Complete!
                 </p>
                 <p className="text-sm text-gray-600">
                   Completed in {moves} moves!
@@ -284,7 +326,7 @@ interface PlayerStats {
                 ) : (
                   <div className="space-y-2">
                     <p className="text-lg font-bold text-purple-600">
-                      🏆 Game Complete!
+                      Game Complete!
                     </p>
                     <p className="text-sm">Final Score: {score} points</p>
                       <p className="text-sm">Total Moves: <span className="font-mono">{moves}</span></p>
@@ -294,28 +336,9 @@ interface PlayerStats {
                       </Button>
                   </div>
                 )}
-                {isGameOver && leaderboard.length > 0 && (
-                  <div className="bg-white/10 p-4 mt-4 rounded-xl border border-white/20">
-                    <h2 className="text-lg font-semibold mb-2">🏆 Leaderboard</h2>
-                    <div className="text-sm space-y-2">
-                      {leaderboard.map((player, idx) => (
-                        <div key={player.id} className="flex justify-between">
-                          <span>{idx + 1}. {player.name}</span>
-                          <span className="font-mono">
-                            {player.score} pts – {player.moves} moves – {formatTime(player.time)}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
               </div>
             )}
 
-            {/* Room Info */}
-            <RoomInfo roomKey={roomKey} gridSize={gridSize} colors={colors} rounds={rounds} room={room}/>
-            {/* Instructions */}
-            <Instructions/>
           </div>
         </div>
       </div>

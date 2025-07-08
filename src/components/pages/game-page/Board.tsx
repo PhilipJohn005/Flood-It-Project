@@ -11,7 +11,7 @@ type BoardProps={
 const Board:React.FC<BoardProps> = ({gridSize,board,COLORS}) => {
   return (
       <div className="lg:col-span-3">
-            <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10">
+            <div className="backdrop-blur-sm rounded-2xl p-6">
               <div className="p-4 rounded border overflow-auto">
                 <div 
                   className="grid gap-1 mx-auto"
