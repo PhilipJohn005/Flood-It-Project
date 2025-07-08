@@ -72,14 +72,18 @@ io.on("connection", (socket) => {
 
     if(!roomStats[roomKey])roomStats[roomKey]=[];
 
-    const { colors,gridSize } = room.settings;
+    const { colors,gridSize,rounds } = room.settings;
 
     const colorWeight = 1 + (colors - 4) * 0.1;
     const timeWeight = 0.05;
-
     const timeInSeconds = time / 1000;
-    const score = (moves * colorWeight) + (timeInSeconds * timeWeight);
-    roomStats[roomKey].push({id:playerId,name,moves,time,score});
+
+    const averageNumOfMoves=moves/rounds;
+    const averageTime=timeInSeconds/rounds
+
+    const score = (averageNumOfMoves * colorWeight) + (averageTime * timeWeight);
+
+    roomStats[roomKey].push({id:playerId,name,moves,time,score});  //person has completed it locally
 
     const boardSize=`${gridSize}x${gridSize}`
     const dynamoParams={
