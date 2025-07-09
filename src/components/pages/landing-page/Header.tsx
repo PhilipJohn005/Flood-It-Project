@@ -14,7 +14,7 @@ const Header = () => {
       <header className="border-b shadow-lg p-4 bg-gray-800">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <div className="flex items-center space-x-4">
-            <h1 className="font-bold text-2xl text-white">FloodFill Arena</h1>
+
           </div>
           <div>
             {session?.user ? (
