@@ -19,7 +19,11 @@ const Afterheader = () => {
               <Link href={"/single-player"}>
                 <Button className="h-16 w-full bg-gray-700 hover:bg-gray-800 text-white text-lg">
                   <Play className="w-6 h-6 mr-3" />
-                  <div>Single Player</div>
+                  <div className="flex flex-col text-center">
+                    <div>Single Player</div>
+                  <div className="text-xs opacity-80">Login Required</div>
+                  </div>
+                  
                 </Button>
               </Link>
 
@@ -27,8 +31,8 @@ const Afterheader = () => {
                 <Button className="h-16 w-full bg-gray-600 hover:bg-gray-700 text-white text-lg">
                   <Users className="w-6 h-6 mr-3" />
                   <div className="text-left">
-                    <div>Multiplayer</div>
-                    <div className="text-sm opacity-80">Login Required</div>
+                    <div>Custom-Player</div>
+                    <div className="text-sm opacity-80"></div>
                   </div>
                 </Button>
               </Link>
