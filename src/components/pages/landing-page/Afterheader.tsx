@@ -30,24 +30,21 @@ const Afterheader = () => {
               <Link href={"/multi-player"}>
                 <Button className="h-16 w-full bg-gray-600 hover:bg-gray-700 text-white text-lg">
                   <Users className="w-6 h-6 mr-3" />
-                  <div className="text-left">
+                  <div className="text-center">
                     <div>Custom-Player</div>
-                    <div className="text-sm opacity-80"></div>
+                    <div className="text-xs opacity-80">Login Required</div>
                   </div>
                 </Button>
               </Link>
 
-              <div className="grid grid-cols-2 gap-3 col-span-2">
+              <div className="grid grid-cols-1 gap-3 col-span-2">
                 <Link href={"/leaderboard"}>
                   <Button variant="outline" className="h-12 w-full border-gray-400 text-gray-700 hover:bg-gray-200">
-                    <Trophy className="w-5 h-5 mr-2" />
+                    <Trophy className="w-full h-5 mr-2" />
                     Leaderboard
                   </Button>
                 </Link>
-                <Button variant="outline" className="h-12 border-gray-400 text-gray-700 hover:bg-gray-200">
-                  <Settings className="w-5 h-5 mr-2" />
-                  Settings
-                </Button>
+                
               </div>
             </div>
           </CardContent>

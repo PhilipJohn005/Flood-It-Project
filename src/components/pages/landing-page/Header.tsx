@@ -10,57 +10,56 @@ const Header = () => {
   const { data: session } = useSession();
 
   return (
-    <div>
-      <header className="border-b shadow-lg p-4 bg-gray-800">
-        <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-
-          </div>
-          <div>
-            {session?.user ? (
-              <div className="flex items-center gap-4">
-                {session.user.image && (
-                  <Image
-                    src={session.user.image}
-                    alt="profile"
-                    width={40}
-                    height={40}
-                    className="w-10 h-10 rounded-full"
-                  />
-                )}
-                <div className="text-white text-right">
-                  <p className="text-sm font-semibold">{session.user.name}</p>
-                  <p className="text-xs">{session.user.email}</p>
-                </div>
-                <Button
-                  onClick={() => signOut({ callbackUrl: "/" })}
-                  className="rounded-lg bg-red-600 px-4 py-2 text-white hover:bg-red-700 transition"
-                >
-                  Logout
-                </Button>
-              </div>
-            ) : (
-              <SigninButton />
+    <div className="bg-gradient-to-br shadow-inner pb-10">
+      {/* Top login bar */}
+      <div className="flex justify-end px-6 pt-4">
+        {session?.user ? (
+          <div className="flex items-center gap-4">
+            {session.user.image && (
+              <Image
+                src={session.user.image}
+                alt="profile"
+                width={40}
+                height={40}
+                className="w-10 h-10 rounded-full"
+              />
             )}
+            <div className="text-right text-gray-800">
+              <p className="text-sm font-semibold">{session.user.name}</p>
+              <p className="text-xs">{session.user.email}</p>
+            </div>
+            <Button
+              onClick={() => signOut({ callbackUrl: "/" })}
+              className="rounded-lg bg-red-600 px-4 py-2 text-white hover:bg-red-700 transition"
+            >
+              Logout
+            </Button>
           </div>
-        </div>
-      </header>
+        ) : (
+          <SigninButton />
+        )}
+      </div>
 
-      <div className="text-center space-y-4 bg-gray-800">
-        <div className="bg-gradient-to-br from-gray-100 to-gray-200 text-gray-900 p-8 shadow-xl">
-          <h1 className="text-4xl sm:text-6xl font-bold mb-4 text-gray-900">
-            FloodFill
-          </h1>
-          <p className="text-lg sm:text-xl mb-6 text-gray-700">
-            The ultimate color puzzle challenge! Fill the entire board with one
-            color in the minimum moves possible.
-          </p>
-          <div className="flex flex-wrap justify-center gap-4 text-sm">
-            <div className="bg-gray-300 px-3 py-1 rounded-full text-gray-800">Strategic Thinking</div>
-            <div className="bg-gray-300 px-3 py-1 rounded-full text-gray-800">Quick Reflexes</div>
-            <div className="bg-gray-300 px-3 py-1 rounded-full text-gray-800">High Scores</div>
-          </div>
+      {/* Hero section */}
+      <div className="text-center mt-10 px-4">
+        <h1 className="text-6xl sm:text-7xl font-extrabold text-gray-800 mb-6 tracking-tight leading-tight">
+          Flood<span className="text-gray-600">Fill</span>
+        </h1>
+        <p className="text-xl sm:text-2xl text-gray-700 max-w-3xl mx-auto mb-8 font-medium">
+          The ultimate color puzzle challenge. Fill the board in the fewest moves.
+        </p>
+
+        <div className="flex flex-wrap justify-center gap-3 mt-4">
+          {["Strategic Thinking", "Quick Reflexes"].map((tag, idx) => (
+            <span
+              key={idx}
+              className="bg-gray-300 text-gray-800 text-sm font-medium px-4 py-1 rounded-full shadow-sm border border-gray-400/40 hover:scale-105 transition-transform duration-200"
+            >
+              {tag}
+            </span>
+          ))}
         </div>
+
       </div>
     </div>
   );

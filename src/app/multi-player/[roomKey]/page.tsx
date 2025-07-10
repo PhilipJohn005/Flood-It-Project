@@ -247,7 +247,7 @@ interface PlayerStats {
           <div>
             <Board gridSize={gridSize} board={board} COLORS={COLORS}/>
             
-                <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10">
+            <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10">
               <h3 className="text-lg font-semibold mb-4">Color Palette</h3>
               <div className="flex justify-center space-x-2 p-3 bg-gray-50 rounded border">
                 {colorPalette.map((color, index) => (
@@ -265,9 +265,7 @@ interface PlayerStats {
           </div>
           
           {/* Right panel */}
-          <div className="space-y-6">
-            {/* Color Palette */}
-            
+          <div className="space-y-6">            
                 <div className="bg-white/10 p-4 mt-4 rounded-xl border border-white/20">
                     <div className='flex justify-center items-center py-4'>
                       <Trophy className='w-6 h-6 text-yellow-300' />
