@@ -11,13 +11,13 @@ const page = () => {
 
         <div className="mb-8">
           <Link href={"/"}>
-            <button className="inline-flex items-center gap-2 text-white hover:text-gray-100 transition-colors mb-6 group cursor-pointer">
+            <button className="inline-flex items-center gap-2  hover:text-gray-100 transition-colors mb-6 group cursor-pointer">
               <ArrowLeft size={18} />
               Back to Home
             </button>
           </Link>
-          <h1 className="text-2xl md:text-3xl font-semibold text-white mb-2">Setup Canvas</h1>
-          <p className="text-gray-200">Create a new room or join an existing one</p>
+          <h1 className="text-2xl md:text-3xl font-semibold mb-2">Setup Canvas</h1>
+          <p className="">Create a new room or join an existing one</p>
         </div>
 
         <div className="grid lg:grid-cols-2 gap-6 md:gap-8">

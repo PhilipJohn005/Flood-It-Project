@@ -6,9 +6,9 @@ import { useRouter } from 'next/navigation';
 import { getSocket } from '@/lib/socket';
 
 const Createroom = () => {
-  const [gridSize, setGridSize] = useState(6);
-  const [colorCount, setColorCount] = useState(3);
-  const [rounds, setRounds] = useState(1);
+  const [gridSize, setGridSize] = useState(8);
+  const [colorCount, setColorCount] = useState(4);
+  const [rounds, setRounds] = useState(5);
   const [name, setName] = useState('');
   const router = useRouter();
   const socket = getSocket();
@@ -29,17 +29,17 @@ const Createroom = () => {
   };
 
   return (
-    <div>
-      <div className="rounded-xl p-6 border border-gray-300 bg-gray-100 shadow-sm">
+    <div className=''>
+      <div className="rounded-xl p-6 border border-gray-300 shadow-sm bg-gray-800" >
         <div className="flex items-center gap-3 mb-6">
           <div className="w-10 h-10 bg-gray-700 rounded-lg flex items-center justify-center">
             <Grid3X3 size={20} className="text-gray-200" />
           </div>
-          <h2 className="text-xl font-medium text-gray-900">Create New Room</h2>
+          <h2 className="text-xl font-medium text-gray-300">Create New Room</h2>
         </div>
 
         <div className='space-y-3 mb-3'>
-          <label className="block text-sm font-medium text-gray-700">Name:</label>
+          <label className="block text-sm font-medium text-gray-300">Name:</label>
           <input
             value={name}
             placeholder='xyz'
@@ -51,58 +51,58 @@ const Createroom = () => {
         <div className="space-y-6">
           {/* Grid Size */}
           <div className="space-y-3">
-            <label className="block text-sm font-medium text-gray-700">
+            <label className="block text-sm font-medium text-gray-300">
               Grid Size: {gridSize}×{gridSize}
             </label>
             <input
               type="range"
-              min="6"
+              min="8"
               max="16"
               value={gridSize}
               onChange={(e) => setGridSize(Number(e.target.value))}
               className="w-full h-2 bg-gray-400 rounded-lg appearance-none cursor-pointer"
             />
-            <div className="flex justify-between text-xs text-gray-500">
-              <span>6×6</span>
+            <div className="flex justify-between text-xs text-gray-300">
+              <span>8x8</span>
               <span>16x16</span>
             </div>
           </div>
 
           {/* Color Count */}
           <div className="space-y-3">
-            <label className="block text-sm font-medium text-gray-700">
+            <label className="block text-sm font-medium text-gray-300">
               Colors: {colorCount}
             </label>
             <input
               type="range"
-              min="3"
+              min="4"
               max="8"
               value={colorCount}
               onChange={(e) => setColorCount(Number(e.target.value))}
               className="w-full h-2 bg-gray-400 rounded-lg appearance-none cursor-pointer"
             />
-            <div className="flex justify-between text-xs text-gray-500">
-              <span>3 colors</span>
+            <div className="flex justify-between text-xs text-gray-300">
+              <span>4 colors</span>
               <span>8 colors</span>
             </div>
           </div>
 
           {/* Rounds */}
           <div className="space-y-3">
-            <label className="block text-sm font-medium text-gray-700">
+            <label className="block text-sm font-medium text-gray-300">
               Rounds: {rounds}
             </label>
             <input
               type="range"
-              min="1"
-              max="10"
+              min="5"
+              max="24"
               value={rounds}
               onChange={(e) => setRounds(Number(e.target.value))}
               className="w-full h-2 bg-gray-400 rounded-lg appearance-none cursor-pointer"
             />
-            <div className="flex justify-between text-xs text-gray-500">
-              <span>1 round</span>
-              <span>10 rounds</span>
+            <div className="flex justify-between text-xs text-gray-300">
+              <span>5 round</span>
+              <span>24 rounds</span>
             </div>
           </div>
 

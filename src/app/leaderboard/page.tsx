@@ -15,6 +15,7 @@ interface Player {
   score: number;
   moves: number;
   timeCompleted: string;
+  colors:number;
 }
 
 const boardSizes = [
@@ -56,6 +57,7 @@ const Leaderboard = () => {
           score: p.score,
           moves: p.moves,
           timeCompleted: formatTime(p.time),
+          colors:p.colors,
         }));
         setData(prev => ({ ...prev, [selectedBoard]: leaderboard }));
       } else {
@@ -73,8 +75,9 @@ const Leaderboard = () => {
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto space-y-4 px-2">
-      <Card className="bg-white shadow-lg">
+    <div className="min-h-screen bg-gradient-to-br from-gray-200 via-gray-400 to-gray-600">
+      <div className="max-w-4xl mx-auto space-y-4 px-2 pt-15">
+        <Card className="bg-gray-900 shadow-lg">
         <CardHeader className="pb-4">
           <div className="flex items-center justify-between">
             <Button variant="outline" size="sm">
@@ -82,7 +85,7 @@ const Leaderboard = () => {
             </Button>
             <CardTitle className="flex items-center space-x-2">
               <Trophy className="w-6 h-6 text-yellow-500" />
-              <span>Leaderboards</span>
+              <span className="text-gray-300">Leaderboards</span>
             </CardTitle>
             <div className="w-16" />
           </div>
@@ -105,18 +108,19 @@ const Leaderboard = () => {
             {boardSizes.map((board) => (
               <TabsContent key={board.size} value={board.size} className="space-y-3">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold flex items-center gap-2">
+                  <h3 className="text-lg font-semibold flex items-center gap-2 text-gray-300">
                     {board.label} Board
                   </h3>
                   <div className="text-sm text-gray-500">Top 20 Players</div>
                 </div>
 
-                <div className="grid grid-cols-5 gap-2 p-3 bg-gray-100 rounded font-semibold text-sm">
+                <div className="grid grid-cols-6 gap-2 p-3 bg-gray-100 rounded font-semibold text-sm">
                   <div>Rank</div>
                   <div>Player</div>
                   <div className="text-center">Score</div>
                   <div className="text-center">Moves</div>
                   <div className="text-center">Time</div>
+                  <div className="text-center">Colors</div>
                 </div>
 
                 {loading ? (
@@ -126,7 +130,7 @@ const Leaderboard = () => {
                     {(data[board.size] || []).map((player) => (
                       <div
                         key={`${board.size}-${player.rank}`}
-                        className={`grid grid-cols-5 gap-2 p-3 rounded border transition-colors hover:bg-gray-50`}
+                        className={`grid grid-cols-6 gap-2 p-3 rounded border transition-colors hover:bg-gray-50`}
                       >
                         <div className="flex items-center space-x-2">
                           {getRankIcon(player.rank)}
@@ -136,6 +140,7 @@ const Leaderboard = () => {
                         <div className="text-center font-bold">{player.score}</div>
                         <div className="text-center">{player.moves}</div>
                         <div className="text-center text-sm text-gray-600">{player.timeCompleted}</div>
+                        <div className="text-center">{player.colors}</div>
                       </div>
                     ))}
                   </div>
@@ -146,6 +151,8 @@ const Leaderboard = () => {
 
         </CardContent>
       </Card>
+      </div>
+      
     </div>
   );
 };
