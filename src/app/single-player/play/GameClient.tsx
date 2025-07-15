@@ -28,12 +28,7 @@ type Prop = {
   searchParams: Record<string, string | string[] | undefined>;
 };
 
-const GameClient = ({ searchParams }:Prop) => {
-     const gridSize = Number(searchParams.grid ?? 8);
-  const colors = Number(searchParams.colors ?? 4);
-  const rounds = Number(searchParams.rounds ?? 5);
-  const name =
-    typeof searchParams.name === "string" ? searchParams.name : "Unknown";
+const GameClient = ({ gridSize, colors, rounds, name }: Props) => {
   const [board, setBoard] = useState<CellColor[][]>([]);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isGameOver, setIsGameOver] = useState(false);
@@ -164,11 +159,11 @@ const GameClient = ({ searchParams }:Prop) => {
   };
 
   return (
-    <div className="min-h-screen p-4">
+    <div className="min-h-screen p-4 bg-gray-300">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-4 p-4 rounded-xl bg-white/5 border border-white/10 text-center">
-          <h2 className="text-xl font-semibold">Welcome, {name}</h2>
+          <h2 className="text-xl font-semibold">{name}</h2>
           <p className="text-sm text-muted-foreground">Single Player Mode</p>
         </div>
 
@@ -187,7 +182,7 @@ const GameClient = ({ searchParams }:Prop) => {
                     key={index}
                     onClick={() => handleColorClick(index)}
                     disabled={gameWon || isGameOver}
-                    className={`w-8 h-8 rounded ${color} border-2 border-gray-300 hover:border-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:scale-105 ${
+                    className={`w-8 h-8 rounded ${color} border-2 cursor-pointer border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed ${
                       board[0]?.[0] === index ? "ring-2 ring-black" : ""
                     }`}
                   />
@@ -198,33 +193,33 @@ const GameClient = ({ searchParams }:Prop) => {
 
           {/* Stats */}
           <div className="space-y-6">
-            <div className="bg-white/10 p-4 rounded-xl border border-white/20">
+            <div className="bg-white p-4 rounded-xl border border-white/20">
               <div className="text-sm space-y-2">
                 <div className="flex justify-between">
-                  <span className="font-medium">👤 Player</span>
+                  <span className="font-medium"><span></span> Player</span>
                   <span>{name}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="font-medium">🏁 Round</span>
+                  <span className="font-medium"> Round</span>
                   <span>{currentRound} / {rounds}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="font-medium">🎯 Moves</span>
+                  <span className="font-medium"> Moves</span>
                   <span>{moves}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="font-medium">🏆 Score</span>
+                  <span className="font-medium"> Score</span>
                   <span>{score}</span>
                 </div>
                 {gameStarted && !isGameOver && (
                   <div className="flex justify-between">
-                    <span className="font-medium">⏱️ Time</span>
+                    <span className="font-medium">Time</span>
                     <span>{formatTime(liveElapsed)}</span>
                   </div>
                 )}
                 {isGameOver && timeTaken !== null && (
                   <div className="flex justify-between">
-                    <span className="font-medium">⌛ Total Time</span>
+                    <span className="font-medium">Total Time</span>
                     <span>{formatTime(timeTaken)}</span>
                   </div>
                 )}
@@ -233,10 +228,6 @@ const GameClient = ({ searchParams }:Prop) => {
 
             {gameWon && (
               <div className="text-center space-y-3 p-4 border rounded">
-                <p className="text-lg font-bold text-green-600">
-                  <PartyPopper className="inline mr-2" />
-                  Round {currentRound} Complete!
-                </p>
                 <p className="text-sm text-gray-600">Completed in {moves} moves!</p>
                 {currentRound < rounds ? (
                   <Button onClick={handleNext} className="bg-green-600 hover:bg-green-700 w-full">
@@ -245,9 +236,9 @@ const GameClient = ({ searchParams }:Prop) => {
                 ) : (
                   <div className="space-y-2">
                     <p className="text-lg font-bold text-purple-600">Game Complete!</p>
-                    <p className="text-sm">Final Score: {score} points</p>
-                    <p className="text-sm">Total Moves: <span className="font-mono">{moves}</span></p>
-                    <p className="text-sm">Total Time: <span>{formatTime(timeTaken || liveElapsed)}</span></p>
+                    <p className="text-sm ">Final Score: <span className="font-bold">{score}points</span> </p>
+                    <p className="text-sm">Total Moves: <span className="font-mono font-bold">{moves}</span></p>
+                    <p className="text-sm">Total Time: <span className="font-bold">{formatTime(timeTaken || liveElapsed)}</span></p>
                   </div>
                 )}
               </div>
