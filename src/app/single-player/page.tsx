@@ -64,7 +64,7 @@ export default function SinglePlayerConfigForm() {
         <label className="block text-sm font-medium text-gray-300">
           Rounds: {rounds}
         </label>
-        <input type="range" min="5" max="24" value={rounds}
+        <input type="range" min="1" max="24" value={rounds}
           onChange={(e) => setRounds(Number(e.target.value))}
           className="w-full" />
         <div className='flex justify-between text-xs text-gray-300'>
