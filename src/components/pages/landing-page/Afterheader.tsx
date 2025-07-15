@@ -3,8 +3,15 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Trophy, Play, Users, Settings } from "lucide-react";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
+
+
 
 const Afterheader = () => {
+
+  const {data:session}=useSession();
+  const isLoggedin=!!session?.user;
+
   return (
     <div className="min-h-screen">
       <div className="w-full max-w-4xl mx-auto space-y-6 px-2 py-4">
@@ -16,26 +23,47 @@ const Afterheader = () => {
             </div>
 
             <div className="grid sm:grid-cols-2 gap-4">
-              <Link href={"/single-player"}>
-                <Button className="h-16 w-full bg-gray-700 hover:bg-gray-800 text-white text-lg">
+              {/* SINGLE PLAYER */}
+              {isLoggedin ? (
+                <Link href="/single-player">
+                  <Button className="h-16 w-full bg-gray-700 hover:bg-gray-800 text-white text-lg">
+                    <Play className="w-6 h-6 mr-3" />
+                    <div className="flex flex-col text-center">
+                      <div>Single Player</div>
+                      <div className="text-xs opacity-80">Ready to go</div>
+                    </div>
+                  </Button>
+                </Link>
+              ) : (
+                <Button disabled className="h-16 w-full bg-gray-400 text-white text-lg opacity-60 cursor-not-allowed">
                   <Play className="w-6 h-6 mr-3" />
                   <div className="flex flex-col text-center">
                     <div>Single Player</div>
-                  <div className="text-xs opacity-80">Login Required</div>
+                    <div className="text-xs">Login Required</div>
                   </div>
-                  
                 </Button>
-              </Link>
+              )}
 
-              <Link href={"/multi-player"}>
-                <Button className="h-16 w-full bg-gray-600 hover:bg-gray-700 text-white text-lg">
+              {/* CUSTOM PLAYER */}
+              {isLoggedin ? (
+                <Link href="/multi-player">
+                  <Button className="h-16 w-full bg-gray-600 hover:bg-gray-700 text-white text-lg">
+                    <Users className="w-6 h-6 mr-3" />
+                    <div className="text-center">
+                      <div>Custom-Player</div>
+                      <div className="text-xs opacity-80">Play with friends</div>
+                    </div>
+                  </Button>
+                </Link>
+              ) : (
+                <Button disabled className="h-16 w-full bg-gray-400 text-white text-lg opacity-60 cursor-not-allowed">
                   <Users className="w-6 h-6 mr-3" />
                   <div className="text-center">
                     <div>Custom-Player</div>
-                    <div className="text-xs opacity-80">Login Required</div>
+                    <div className="text-xs">Login Required</div>
                   </div>
                 </Button>
-              </Link>
+              )}
 
               <div className="grid grid-cols-1 gap-3 col-span-2">
                 <Link href={"/leaderboard"}>
