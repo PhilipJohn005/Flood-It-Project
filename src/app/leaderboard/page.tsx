@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import Link from "next/link";
 
 
 interface Player {
@@ -45,6 +46,8 @@ const Leaderboard = () => {
   const [selectedBoard, setSelectedBoard] = useState("8x8");
   const [data, setData] = useState<{ [key: string]: Player[] }>({});
   const [loading, setLoading] = useState(false);
+  const [currIndex,setCurrIndex]=useState(2);
+
 
   useEffect(() => {
     const socket = getSocket();
@@ -56,7 +59,7 @@ const Leaderboard = () => {
           username: p.name,
           score: p.score,
           moves: p.moves,
-          timeCompleted: formatTime(p.time),
+          timeCompleted: p.time,
           colors:p.colors,
         }));
         setData(prev => ({ ...prev, [selectedBoard]: leaderboard }));
@@ -80,9 +83,11 @@ const Leaderboard = () => {
         <Card className="bg-gray-900 shadow-lg">
         <CardHeader className="pb-4">
           <div className="flex items-center justify-between">
-            <Button variant="outline" size="sm">
+            <Link href={"/"}>
+            <Button variant="outline" size="sm" className="cursor-pointer">
               ← Back
             </Button>
+            </Link>
             <CardTitle className="flex items-center space-x-2">
               <Trophy className="w-6 h-6 text-yellow-500" />
               <span className="text-gray-300">Leaderboards</span>
@@ -93,12 +98,14 @@ const Leaderboard = () => {
 
         <CardContent>
           <Tabs value={selectedBoard} onValueChange={setSelectedBoard} className="w-full">
-            <TabsList className="grid grid-cols-6 lg:grid-cols-11 mb-6 gap-1 h-auto p-1">
-              {boardSizes.map((board) => (
+            <TabsList className="grid grid-cols-11 lg:grid-cols-11 mb-6 gap-1 h-auto p-1">
+              {boardSizes.map((board,index) => (
                 <TabsTrigger
                   key={board.size}
+                  onClick={(e)=>setCurrIndex(index)}
                   value={board.size}
-                  className="text-xs py-1 px-6 cursor-pointer"
+                  className={`text-xs py-1 px-6 rounded cursor-pointer transition ${
+                      index === currIndex? "bg-gray-400": " text-gray-700"}`}
                 >
                   {board.label}
                 </TabsTrigger>
@@ -130,7 +137,7 @@ const Leaderboard = () => {
                     {(data[board.size] || []).map((player) => (
                       <div
                         key={`${board.size}-${player.rank}`}
-                        className={`grid grid-cols-6 gap-2 p-3 rounded border transition-colors hover:bg-gray-50`}
+                        className={`grid grid-cols-6 gap-2 p-3 bg-gray-500 rounded border transition-colors hover:bg-gray-400/50`}
                       >
                         <div className="flex items-center space-x-2">
                           {getRankIcon(player.rank)}
@@ -139,7 +146,7 @@ const Leaderboard = () => {
                         <div className="font-medium truncate">{player.username}</div>
                         <div className="text-center font-bold">{player.score}</div>
                         <div className="text-center">{player.moves}</div>
-                        <div className="text-center text-sm text-gray-600">{player.timeCompleted}</div>
+                        <div className="text-center text-sm">{player.timeCompleted}</div>
                         <div className="text-center">{player.colors}</div>
                       </div>
                     ))}
