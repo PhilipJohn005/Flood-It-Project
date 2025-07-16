@@ -10,7 +10,7 @@ const SigninButton = () => {
     <div>
       <Button
       variant="default"
-      onClick={() => signIn('google', { callbackUrl: '/' })}
+      onClick={() => signIn('google', { callbackUrl: 'https://flood-it-project.vercel.app/' })}
       className="rounded-md bg-black px-4 py-2 font-medium text-white hover:bg-gray-800 cursor-pointer dark:bg-white dark:text-black dark:hover:bg-gray-200"
     >
         <LogOut/>
