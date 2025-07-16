@@ -123,7 +123,7 @@ const GameClient = ({ gridSize, colors, rounds, name }: Props) => {
         setTimeTaken(endTime - startTime);
 
         try {
-          await fetch("http://localhost:4000/insertSinglePlayer", {
+          await fetch("http://16.171.42.229:4000/insertSinglePlayer", {
             method: "POST",
             body: JSON.stringify({
               playerId: Math.random().toString(36).substring(2, 12),
