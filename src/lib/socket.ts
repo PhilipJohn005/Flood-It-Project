@@ -1,15 +1,51 @@
-// lib/socket.ts
-import io from "socket.io-client";
+import { io, type Socket } from "socket.io-client";
 
-let socket: SocketIOClient.Socket;
+let socket: Socket;
 
-export function getSocket(): SocketIOClient.Socket {
+export function getSocket(): Socket {
   if (!socket) {
-    socket = io("https://flood-it-backend.duckdns.org", { //connects to ec2 backend port 4000   this is ec2->http://16.171.42.229 and this is port on ec2 where the backend running->4000
-    transports: ["websocket"],
-    secure: true
-});
+    console.log("🔌 Initializing socket connection...");
+    
+    socket = io("https://flood-it-backend.duckdns.org", {
+      transports: ["polling", "websocket"],
+      upgrade: true,
+      rememberUpgrade: true,
+      secure: true,
+      reconnection: true,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 1000,
+      randomizationFactor: 0.5,
+      timeout: 20000
+    });
 
+    // Connection lifecycle events
+    socket.on("connect", () => {
+      console.log("✅ Connected with ID:", socket.id);
+    });
+
+    socket.on("disconnect", (reason) => {
+      console.log("🚪 Disconnected:", reason);
+      if (reason === "io server disconnect") {
+        socket.connect(); // automatically reconnect
+      }
+    });
+
+    socket.on("connect_error", (err) => {
+      console.error("❌ Connection error:", err.message);
+      setTimeout(() => socket.connect(), 5000); // try to reconnect
+    });
+
+    socket.on("upgrade", (transport) => {
+      console.log("🔄 Transport upgraded to:", transport.name);
+    });
+
+    // Debug all events (remove in production)
+    if (process.env.NODE_ENV === "development") {
+      socket.onAny((event, ...args) => {
+        console.debug("[Socket.IO]", event, args);
+      });
+    }
   }
+  
   return socket;
 }
