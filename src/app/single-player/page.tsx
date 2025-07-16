@@ -15,7 +15,7 @@ export default function SinglePlayerConfigForm() {
       grid: gridSize.toString(),
       colors: colorCount.toString(),
       rounds: rounds.toString(),
-      name:"k2"
+      name:"k1"
     });
     router.push(`/single-player/play?${queryParams.toString()}`);
   };
