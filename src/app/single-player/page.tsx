@@ -3,19 +3,21 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Grid3X3 } from 'lucide-react';
+import { useSession } from 'next-auth/react';
 
 export default function SinglePlayerConfigForm() {
   const [gridSize, setGridSize] = useState(8);
   const [colorCount, setColorCount] = useState(4);
   const [rounds, setRounds] = useState(5);
   const router = useRouter();
+  const {data:session,status}=useSession();
 
   const handleStartGame = () => {
     const queryParams = new URLSearchParams({
       grid: gridSize.toString(),
       colors: colorCount.toString(),
       rounds: rounds.toString(),
-      name:"John"
+      name:session?.user?.name ?? "Guest"
     });
     router.push(`/single-player/play?${queryParams.toString()}`);
   };

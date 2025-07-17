@@ -4,10 +4,14 @@ import React, { useState } from "react";
 import { Key } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { getSocket } from "@/lib/socket";
+import { useSession } from "next-auth/react";
 
 const Joinroom = () => {
   const [roomKey, setRoomKey] = useState("");
-  const [name] = useState("john");
+  const {data:session}=useSession();
+
+
+  const name=session?.user?.name ?? "Guest";
 
   const router = useRouter();
   const socket = getSocket();
