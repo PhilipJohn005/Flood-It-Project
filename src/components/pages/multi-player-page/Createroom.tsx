@@ -4,24 +4,28 @@ import React, { useRef, useState } from 'react';
 import { Grid3X3 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { getSocket } from '@/lib/socket';
+import { useSession } from 'next-auth/react';
 
 const Createroom = () => {
   const [gridSize, setGridSize] = useState(8);
   const [colorCount, setColorCount] = useState(4);
   const [rounds, setRounds] = useState(5);
-  const [name, setName] = useState('');
   const router = useRouter();
   const socket = getSocket();
+  const {data:session}=useSession();
+
+  const userName=session?.user?.name ?? "Guest";
+
 
   const handleCreateRoom = () => {
     socket.emit("create-room", {
-      name,
+      userName,
       gridSize,
       colors: colorCount,
       rounds,
     }, ({ roomKey }: { roomKey: string }) => {
       const queryParams = new URLSearchParams({
-        name,
+        userName,
         mode: 'create',
       });
       router.push(`/multi-player/${roomKey}?${queryParams.toString()}`);
@@ -41,9 +45,8 @@ const Createroom = () => {
         <div className='space-y-3 mb-3'>
           <label className="block text-sm font-medium text-gray-300">Name:</label>
           <input
-            value={name}
-            placeholder='xyz'
-            onChange={(e) => setName(e.target.value)}
+            placeholder={`${userName}`}
+            disabled={true}
             className="w-full bg-gray-800 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:border-gray-500 focus:outline-none text-center font-mono tracking-wider"
           />
         </div>
