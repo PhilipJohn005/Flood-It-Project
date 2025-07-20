@@ -6,7 +6,7 @@ import { ArrowLeft, Crown, Grid3X3, Palette, Users,Check,Copy } from 'lucide-rea
 import { Badge } from '@/components/ui/badge'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
-
+import { getSocket } from '@/lib/socket'
 
 
 interface Player {
@@ -76,10 +76,15 @@ const Header= ({
               <div className="flex items-center gap-3 mb-1">
                 <Button 
                   variant="outline" 
-                  onClick={() => router.push('/multi-player')}
+                  onClick={() => {
+                    const socket = getSocket();
+                    socket.emit("leave-room", { roomKey });
+                    router.push('/multi-player');
+                  }}
                   size="sm"
                   className="mr-2"
                 >
+
                   <ArrowLeft className="w-4 h-4 mr-1" />
                   Leave
                 </Button>
