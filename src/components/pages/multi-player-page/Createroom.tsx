@@ -19,7 +19,7 @@ const Createroom = () => {
 
   const handleCreateRoom = () => {
     socket.emit("create-room", {
-      userName,
+      name:userName,
       gridSize,
       colors: colorCount,
       rounds,
