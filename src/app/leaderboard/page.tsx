@@ -20,10 +20,6 @@ interface Player {
 }
 
 const boardSizes = [
-  { size: "6x6", label: "6×6" },
-  { size: "7x7", label: "7×7" },
-  { size: "8x8", label: "8×8" },
-  { size: "9x9", label: "9×9" },
   { size: "10x10", label: "10×10" },
   { size: "11x11", label: "11×11" },
   { size: "12x12", label: "12×12" },
@@ -43,7 +39,7 @@ const getRankIcon = (rank: number) => {
 };
 
 const Leaderboard = () => {
-  const [selectedBoard, setSelectedBoard] = useState("8x8");
+  const [selectedBoard, setSelectedBoard] = useState("11x11");
   const [data, setData] = useState<{ [key: string]: Player[] }>({});
   const [loading, setLoading] = useState(false);
   const [currIndex,setCurrIndex]=useState(2);
@@ -98,7 +94,7 @@ const Leaderboard = () => {
 
         <CardContent>
           <Tabs value={selectedBoard} onValueChange={setSelectedBoard} className="w-full">
-            <TabsList className="grid grid-cols-11 lg:grid-cols-11 mb-6 gap-1 h-auto p-1">
+            <TabsList className="grid grid-cols-7 lg:grid-cols-7 mb-6 gap-1 w-full h-auto p-1">
               {boardSizes.map((board,index) => (
                 <TabsTrigger
                   key={board.size}

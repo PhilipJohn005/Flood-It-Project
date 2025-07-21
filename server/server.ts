@@ -61,13 +61,18 @@ io.on("connection", (socket) => {
     const room = rooms[roomKey];
     if (!room || room.started) return cb({ error: "Room not found or already started" });
 
-          //if current guy name is present and also the socket is not connected then we remove them
-      room.players = room.players.filter(p => io.sockets.sockets.has(p.id) && p.name !== name); //romving...those who is true is taken...false are removed
+    // Remove disconnected players
+    room.players = room.players.filter(p => io.sockets.sockets.has(p.id));
 
-    room.players.push({ id: socket.id, name });
+    // Avoid duplicates
+    if (!room.players.some(p => p.id === socket.id)) {
+      room.players.push({ id: socket.id, name });
+    }
+
     socket.join(roomKey);
     cb({ success: true });
     io.to(roomKey).emit("room-updated", room);
+
   });
 
 
@@ -79,14 +84,12 @@ io.on("connection", (socket) => {
 
     const { colors,gridSize,rounds } = room.settings;
 
-    const colorWeight = 1 + (colors - 4) * 0.1;
-    const timeWeight = 0.05;
-    const timeInSeconds = time / 1000;
 
     const averageNumOfMoves=moves/rounds;
-    const averageTime=timeInSeconds/rounds
+    const averageTime=time/rounds
+    const colorFactor =Math.pow(1.2,colors-5);
 
-    const score = (averageNumOfMoves * colorWeight) + (averageTime * timeWeight);
+    const score = (averageNumOfMoves*averageTime)/colorFactor;
 
     roomStats[roomKey].push({id:playerId,name,moves,time,score});  //person has completed it locally so put in room
 
@@ -155,10 +158,27 @@ io.on("connection", (socket) => {
   socket.on("start-game", (roomKey) => {
     const room = rooms[roomKey];
     if (room && socket.id === room.host) {
+      // Remove stale sockets before starting
+      room.players = room.players.filter(p => io.sockets.sockets.has(p.id));
+
       room.started = true;
       io.to(roomKey).emit("game-started", room.settings);
     }
   });
+
+  socket.on("leave-room", ({ roomKey }) => {
+    const room = rooms[roomKey];
+    if (!room) return;
+
+    room.players = room.players.filter(p => p.id !== socket.id);
+    socket.leave(roomKey);
+
+    // If no one left, delete room
+    if (room.players.length === 0) {
+      delete rooms[roomKey];
+    }
+  });
+
 
   // Handle disconnect
   socket.on("disconnect", () => {
@@ -183,14 +203,12 @@ app.post("/insertSinglePlayer",async(req,res)=>{
     return;
   }
 
-  const colorWeight = 1 + (colors - 4) * 0.1;
-    const timeWeight = 0.05;
-    const timeInSeconds = endTime / 1000;
 
     const averageNumOfMoves=moves/rounds;
-    const averageTime=timeInSeconds/rounds
+    const averageTime=endTime/rounds
+    const colorFactor = Math.pow(1.2,colors-5);
 
-    const score = (averageNumOfMoves * colorWeight) + (averageTime * timeWeight);
+    const score=(averageNumOfMoves * averageTime)/colorFactor;
 
     const boardSize=`${gridSize}x${gridSize}`
     const dynamoParams={           

@@ -6,8 +6,8 @@ import { Grid3X3 } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 
 export default function SinglePlayerConfigForm() {
-  const [gridSize, setGridSize] = useState(8);
-  const [colorCount, setColorCount] = useState(4);
+  const [gridSize, setGridSize] = useState(10);
+  const [colorCount, setColorCount] = useState(5);
   const [rounds, setRounds] = useState(5);
   const router = useRouter();
   const {data:session,status}=useSession();
@@ -38,11 +38,11 @@ export default function SinglePlayerConfigForm() {
         <label className="block text-sm font-medium text-gray-300">
           Grid Size: {gridSize}x{gridSize}
         </label>
-        <input type="range" min="8" max="16" value={gridSize}
+        <input type="range" min="10" max="16" value={gridSize}
           onChange={(e) => setGridSize(Number(e.target.value))}
           className="w-full" />
         <div className="flex justify-between text-xs text-gray-300">
-            <span>8x8</span>
+            <span>10x10</span>
             <span>16x16</span>
         </div>
       </div>
@@ -52,11 +52,11 @@ export default function SinglePlayerConfigForm() {
         <label className="block text-sm font-medium text-gray-300">
           Colors: {colorCount}
         </label>
-        <input type="range" min="4" max="8" value={colorCount}
+        <input type="range" min="5" max="8" value={colorCount}
           onChange={(e) => setColorCount(Number(e.target.value))}
           className="w-full" />
         <div className='flex justify-between text-xs text-gray-300'>
-          <span>4</span>
+          <span>5</span>
           <span>8</span>
         </div>
       </div>
@@ -66,7 +66,7 @@ export default function SinglePlayerConfigForm() {
         <label className="block text-sm font-medium text-gray-300">
           Rounds: {rounds}
         </label>
-        <input type="range" min="1" max="24" value={rounds}
+        <input type="range" min="5" max="24" value={rounds}
           onChange={(e) => setRounds(Number(e.target.value))}
           className="w-full" />
         <div className='flex justify-between text-xs text-gray-300'>

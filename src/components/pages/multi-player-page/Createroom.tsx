@@ -7,25 +7,25 @@ import { getSocket } from '@/lib/socket';
 import { useSession } from 'next-auth/react';
 
 const Createroom = () => {
-  const [gridSize, setGridSize] = useState(8);
-  const [colorCount, setColorCount] = useState(4);
+  const [gridSize, setGridSize] = useState(10);
+  const [colorCount, setColorCount] = useState(5);
   const [rounds, setRounds] = useState(5);
   const router = useRouter();
   const socket = getSocket();
   const {data:session}=useSession();
 
-  const userName=session?.user?.name ?? "Guest";
+  const name=session?.user?.name ?? "Guest";
 
 
   const handleCreateRoom = () => {
     socket.emit("create-room", {
-      name:userName,
+      name,  //need to check this
       gridSize,
       colors: colorCount,
       rounds,
     }, ({ roomKey }: { roomKey: string }) => {
       const queryParams = new URLSearchParams({
-        userName,
+        name,
         mode: 'create',
       });
       router.push(`/multi-player/${roomKey}?${queryParams.toString()}`);
@@ -45,7 +45,7 @@ const Createroom = () => {
         <div className='space-y-3 mb-3'>
           <label className="block text-sm font-medium text-gray-300">Name:</label>
           <input
-            placeholder={`${userName}`}
+            placeholder={`${name}`}
             disabled={true}
             className="w-full bg-gray-800 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:border-gray-500 focus:outline-none text-center font-mono tracking-wider"
           />
@@ -59,14 +59,14 @@ const Createroom = () => {
             </label>
             <input
               type="range"
-              min="8"
+              min="10"
               max="16"
               value={gridSize}
               onChange={(e) => setGridSize(Number(e.target.value))}
               className="w-full h-2 bg-gray-400 rounded-lg appearance-none cursor-pointer"
             />
             <div className="flex justify-between text-xs text-gray-300">
-              <span>8x8</span>
+              <span>10x10</span>
               <span>16x16</span>
             </div>
           </div>
@@ -78,14 +78,14 @@ const Createroom = () => {
             </label>
             <input
               type="range"
-              min="4"
+              min="5"
               max="8"
               value={colorCount}
               onChange={(e) => setColorCount(Number(e.target.value))}
               className="w-full h-2 bg-gray-400 rounded-lg appearance-none cursor-pointer"
             />
             <div className="flex justify-between text-xs text-gray-300">
-              <span>4 colors</span>
+              <span>5 colors</span>
               <span>8 colors</span>
             </div>
           </div>
