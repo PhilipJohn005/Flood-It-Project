@@ -161,10 +161,13 @@
    AWS_SECRET_ACCESS_KEY=your-aws-secret-key
    AWS_REGION=your-aws-region
    DYNAMODB_TABLE_NAME=flood-fill-leaderboard
+
+   #change other env variables as required by going through the app
    ```
 
 4. **Start Development Server**
    ```bash
+   # Make frontend point to localhost port of backend
    # Start both frontend and backend using concurrently
    npm run dev:fullstack
    
@@ -238,58 +241,6 @@ Where:
 - **🎮 Difficulty Level**: More colors = score multiplier
 ---
 
----
-
-## 🚀 Deployment
-
-### AWS EC2 Deployment
-
-1. **Server Setup**
-   ```bash
-   # Install Node.js and dependencies
-   curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
-   sudo apt-get install -y nodejs nginx certbot python3-certbot-nginx
-   ```
-
-2. **Application Deployment**
-   ```bash
-   # Clone and build
-   git clone <repository-url>
-   cd flood-fill-game
-   npm install
-   npm run build
-   ```
-
-3. **NGINX Configuration**
-   ```nginx
-   server {
-       listen 80;
-       server_name your-domain.duckdns.org;
-       
-       location / {
-           proxy_pass http://localhost:3000;
-           proxy_http_version 1.1;
-           proxy_set_header Upgrade $http_upgrade;
-           proxy_set_header Connection 'upgrade';
-           proxy_set_header Host $host;
-           proxy_cache_bypass $http_upgrade;
-       }
-   }
-   ```
-
-4. **SSL Certificate**
-   ```bash
-   sudo certbot --nginx -d your-domain.duckdns.org
-   ```
-
-### Environment Variables (Production)
-```env
-NODE_ENV=production
-NEXTAUTH_URL=https://your-domain.duckdns.org
-# ... other production configs
-```
-
----
 
 ## 🤝 Contributing
 
@@ -328,8 +279,8 @@ This project is licensed under the MIT License - see the [LICENSE](./LICENSE) fi
 
 Having issues? We're here to help!
 
-- 🐛 **Bug Reports**: [Open an issue](https://github.com/PhilipJohn005/flood-fill-game/issues)
-- 💡 **Feature Requests**: [Start a discussion](https://github.com/PhilipJohn005/flood-fill-game/discussions)
+- 🐛 **Bug Reports**: [Open an issue](https://github.com/PhilipJohn005/Flood-It-Project/issues)
+- 💡 **Feature Requests**: [Start a discussion](https://github.com/PhilipJohn005/Flood-It-Project/discussions)
 - 📧 **Email**: philip200.john@gmail.com
 
 ---
