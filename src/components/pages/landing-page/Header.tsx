@@ -5,9 +5,21 @@ import { signOut, useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import SigninButton from "@/components/pages/landing-page/SigninButton";
 import Image from "next/image";
+import { useEffect } from "react";
+
 
 const Header = () => {
   const { data: session } = useSession();
+
+  useEffect(()=>{
+    if(typeof window!==window.undefined){
+      fetch('api/tracker',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({path:window.location.pathname})
+      })
+    }   
+  },[]);
 
   return (
     <div className="bg-gradient-to-br shadow-inner pb-10">
