@@ -16,6 +16,13 @@ export default function LoginForm() {
   const [maskedIp, setMaskedIp] = useState("");
 
   useEffect(() => {
+    const alreadyShown = localStorage.getItem("ipPopupShown");
+
+    if (!alreadyShown) {
+      setOpen(true);
+
+      localStorage.setItem("ipPopupShown", "true");
+    }
     async function fetchIp() {
       try {
         const res = await fetch("https://api.ipify.org?format=json");
@@ -35,7 +42,7 @@ export default function LoginForm() {
     }
 
     fetchIp();
-    setOpen(true);
+    
   }, []);
 
   return (
