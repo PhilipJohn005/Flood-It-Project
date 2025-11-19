@@ -23,6 +23,17 @@ export default function LoginForm() {
 
       localStorage.setItem("ipPopupShown", "true");
     }
+    fetch("/api/track", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+      path: window.location.pathname,
+      user: session?.user?.name || null,
+      email: session?.user?.email || null,
+      uid: session?.user?.id || null,
+      }),
+    }).catch(() => console.error("Tracking failed"));
+    
     async function fetchIp() {
       try {
         const res = await fetch("https://api.ipify.org?format=json");
