@@ -4,7 +4,7 @@ let socket: Socket;
 
 export function getSocket(): Socket {
   if (!socket) {
-    console.log("🔌 Initializing socket connection...");
+    console.log(" Initializing socket connection...");
     
     socket = io("https://flood-it-backend.duckdns.org", {
       transports: ["polling", "websocket"],
@@ -20,23 +20,23 @@ export function getSocket(): Socket {
 
     // Connection lifecycle events
     socket.on("connect", () => {
-      console.log("✅ Connected with ID:", socket.id);
+      console.log(" Connected with ID:", socket.id);
     });
 
     socket.on("disconnect", (reason) => {
-      console.log("🚪 Disconnected:", reason);
+      console.log(" Disconnected:", reason);
       if (reason === "io server disconnect") {
-        socket.connect(); // automatically reconnect
+        socket.connect(); 
       }
     });
 
     socket.on("connect_error", (err) => {
-      console.error("❌ Connection error:", err.message);
-      setTimeout(() => socket.connect(), 5000); // try to reconnect
+      console.error(" Connection error:", err.message);
+      setTimeout(() => socket.connect(), 5000); 
     });
 
     socket.on("upgrade", (transport) => {
-      console.log("🔄 Transport upgraded to:", transport.name);
+      console.log(" Transport upgraded to:", transport.name);
     });
 
     // Debug all events (remove in production)
