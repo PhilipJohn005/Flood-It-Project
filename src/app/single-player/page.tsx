@@ -22,6 +22,20 @@ export default function SinglePlayerConfigForm() {
     router.push(`/single-player/play?${queryParams.toString()}`);
   };
 
+  useEffect(()=>{
+    fetch("/api/tracker", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        path: window.location.pathname,
+        user: session?.user?.name || null,
+        email: session?.user?.email || null,
+        uid: session?.user?.id || null,
+      }),
+    }).catch(() => console.error("Tracking failed"));
+    
+  },[])
+
   return (
     <div className='pt-15 min-h-screen bg-gradient-to-br from-gray-200 via-gray-400 to-gray-600'>
 
