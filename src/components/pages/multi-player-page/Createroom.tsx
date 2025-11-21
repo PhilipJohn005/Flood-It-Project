@@ -19,7 +19,7 @@ const Createroom = () => {
 
   const handleCreateRoom = () => {
     socket.emit("create-room", {
-      name,  //need to check this
+      name, 
       gridSize,
       colors: colorCount,
       rounds,
@@ -52,7 +52,7 @@ const Createroom = () => {
         </div>
 
         <div className="space-y-6">
-          {/* Grid Size */}
+          
           <div className="space-y-3">
             <label className="block text-sm font-medium text-gray-300">
               Grid Size: {gridSize}×{gridSize}
@@ -71,7 +71,7 @@ const Createroom = () => {
             </div>
           </div>
 
-          {/* Color Count */}
+          
           <div className="space-y-3">
             <label className="block text-sm font-medium text-gray-300">
               Colors: {colorCount}
@@ -90,7 +90,7 @@ const Createroom = () => {
             </div>
           </div>
 
-          {/* Rounds */}
+         
           <div className="space-y-3">
             <label className="block text-sm font-medium text-gray-300">
               Rounds: {rounds}
@@ -109,7 +109,7 @@ const Createroom = () => {
             </div>
           </div>
 
-          {/* Preview */}
+          
           <div className="bg-gray-200 rounded-lg p-4 border border-gray-300">
             <h3 className="text-sm font-medium mb-3 text-gray-700">Configuration</h3>
             <div className="space-y-2 text-sm text-gray-600">

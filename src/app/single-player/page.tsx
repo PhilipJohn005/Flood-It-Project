@@ -47,7 +47,7 @@ export default function SinglePlayerConfigForm() {
         <h2 className="text-xl font-medium text-gray-300">Start Single Player</h2>
       </div>
 
-      {/* Grid Size */}
+      
       <div className="space-y-3 mb-4">
         <label className="block text-sm font-medium text-gray-300">
           Grid Size: {gridSize}x{gridSize}
@@ -61,7 +61,7 @@ export default function SinglePlayerConfigForm() {
         </div>
       </div>
 
-      {/* Colors */}
+      
       <div className="space-y-3 mb-4">
         <label className="block text-sm font-medium text-gray-300">
           Colors: {colorCount}
@@ -75,7 +75,7 @@ export default function SinglePlayerConfigForm() {
         </div>
       </div>
 
-      {/* Rounds */}
+     
       <div className="space-y-3 mb-4">
         <label className="block text-sm font-medium text-gray-300">
           Rounds: {rounds}
