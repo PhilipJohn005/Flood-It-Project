@@ -1,10 +1,29 @@
+"use client"
+
 import React from 'react';
 import Createroom from '@/components/pages/multi-player-page/Createroom';
 import Joinroom from '@/components/pages/multi-player-page/Joinroom';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
+import { useEffect } from 'react';
+import { useSession } from 'next-auth/react';
 
 const page = () => {
+  const {data:session,status}=useSession()
+
+  useEffect(()=>{
+    fetch('/api/tracker',{
+      method:"POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({
+        path: window.location.pathname,
+        user: session?.user?.name || null,
+        email: session?.user?.email || null,
+        uid: session?.user?.id || null
+      }),
+    }).catch((err)=>console.error("Tracking failed. The error is ->" + err));
+  },[])
+
   return (
     <div className='min-h-screen p-4 md:p-6 bg-gradient-to-br from-gray-200 via-gray-400 to-gray-600'>
       <div className='max-w-4xl mx-auto'>
