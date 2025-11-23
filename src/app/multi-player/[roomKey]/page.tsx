@@ -13,7 +13,7 @@ import {
 import { getSocket } from '@/lib/socket'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-
+import { useSession } from 'next-auth/react'
 
 interface Player {
   id: string;
@@ -67,13 +67,28 @@ const RoomPage = () => {
   const [liveElapsed, setLiveElapsed] = useState(0);
   const [leaderboard, setLeaderboard] = useState<PlayerStats[]>([])
   const [timeTaken,setTimeTaken]=useState(0);
-interface PlayerStats {
-  id: string;
-  name: string;
-  moves: number;
-  time: number; // in ms
-  score: number;
-}
+  const { data:session,status } = useSession();
+
+  interface PlayerStats {
+    id: string;
+    name: string;
+    moves: number;
+    time: number; 
+    score: number;
+  }
+
+  useEffect(() => {
+    fetch("/api/track", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        path: window.location.pathname,
+        user: name || null,
+        email : session?.user?.email || null,
+        uid: session?.user?.id || null,
+      }),
+    }).catch(() => console.error("Tracking failed"));
+  }, []);
 
   useEffect(() => {
     const socket = getSocket()
