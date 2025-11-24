@@ -78,7 +78,7 @@ const RoomPage = () => {
   }
 
   useEffect(() => {
-    fetch("/api/track", {
+    fetch("/api/tracker", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -89,6 +89,8 @@ const RoomPage = () => {
       }),
     }).catch(() => console.error("Tracking failed"));
   }, []);
+
+
 
   useEffect(() => {
     const socket = getSocket()
