@@ -66,6 +66,15 @@ const Leaderboard = () => {
     });
   }, [selectedBoard]);
 
+  useEffect(()=>{
+    fetch('/api/tracker',{
+      method:"POST",
+      headers: { "Content-Type" : "application/json" },
+      body : JSON.stringify({path : window.location.pathname})
+    }).catch((err)=>console.error("Tracking failed due to some error " + err));
+  },[])
+
+
   const formatTime = (ms: number) => {
     const sec = Math.floor(ms / 1000);
     const min = Math.floor(sec / 60);
