@@ -178,7 +178,7 @@ const RoomPage = () => {
   const floodFill = (board: CellColor[][], currentStartColor: CellColor, newColor: CellColor, x = 0, y = 0) => {
     const boundaryOfBoard = gridSize
     if (x < 0 || y < 0 || x >= boundaryOfBoard || y >= boundaryOfBoard) return
-    if (currentStartColor !== board[x][y] || newColor == board[x][y]) return
+    if (currentStartColor !== board[x][y] || newColor == board[x][y]) return   //if its not the same as 0,0 color or the color is same as that of new color
 
     board[x][y] = newColor
 
@@ -241,8 +241,8 @@ const RoomPage = () => {
       initializeBoard()
     } else {
       setIsGameOver(true)
+    }
   }
-}
 
     const startGame = () => {
       if (!gridSize || !colors) return;
