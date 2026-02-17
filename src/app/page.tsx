@@ -58,7 +58,7 @@ export default function LoginForm() {
         </div>
       )}
 
-      <Dialog open={open} onOpenChange={setOpen}>
+      {/* <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="rounded-2xl p-6">
           <DialogHeader>
             <DialogTitle className="text-xl font-semibold">Notice</DialogTitle>
@@ -78,7 +78,7 @@ export default function LoginForm() {
             <Button onClick={() => setOpen(false)} className="w-full">Okay</Button>
           </DialogFooter>
         </DialogContent>
-      </Dialog>
+      </Dialog> */}
     </div>
   );
 }

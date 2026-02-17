@@ -40,7 +40,7 @@ const getRankIcon = (rank: number) => {
 
 const Leaderboard = () => {
   const [selectedBoard, setSelectedBoard] = useState("11x11");
-  const [data, setData] = useState<{ [key: string]: Player[] }>({});
+  const [data, setData] = useState<{ [key: string]: Player[] }>({}); //[key: string] this means key type is string and that is having value of player array which is set fo player objects
   const [loading, setLoading] = useState(false);
   const [currIndex,setCurrIndex]=useState(2);
 
@@ -109,8 +109,7 @@ const Leaderboard = () => {
                   key={board.size}
                   onClick={(e)=>setCurrIndex(index)}
                   value={board.size}
-                  className={`text-xs py-1 px-6 rounded cursor-pointer transition ${
-                      index === currIndex? "bg-gray-400": " text-gray-700"}`}
+                  className={`text-xs py-1 px-6 rounded cursor-pointer transition`}
                 >
                   {board.label}
                 </TabsTrigger>

@@ -86,8 +86,8 @@ io.on("connection", (socket) => {
 
 
      const avgMoves = moves / rounds;
-    const avgTime = time / rounds; // Keep in milliseconds!
-    const colorFactor = 1 + (colors - 5) * 0.15; // 15% per extra color
+    const avgTime = time / rounds; // Keep in milliseconds!      colors-> 5    6     7      8
+    const colorFactor = 1 + (colors - 5) * 0.15; // 15% per extra color   1 , 1.15, 1.30 , 1.45 ...
 
      // FINAL SCORE (lower = better)
     const score = (avgMoves * 1e6 + avgTime) / colorFactor;
@@ -128,12 +128,12 @@ io.on("connection", (socket) => {
   socket.on("get-leaderboard", async ({ boardSize, limit = 10 }, cb) => {
   const queryParams = {
     TableName: "Flood-It-Leaderboard",
-    IndexName: "ScoreIndex", // Name of the GSI
-    KeyConditionExpression: "boardSize = :boardSize",
+    IndexName: "ScoreIndex", // Name of the GSI  **not required
+    KeyConditionExpression: "boardSize = :boardSize",  
     ExpressionAttributeValues: {
       ":boardSize": { S: boardSize }
     },
-    ScanIndexForward: true, // ascending order (lower score = better)
+    ScanIndexForward: true, // scan top to bottom....since sk will by default sort in asc  so ths bcms **not required
     Limit: limit
   };
 
