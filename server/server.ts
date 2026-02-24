@@ -31,12 +31,12 @@ type Room = {
   settings: { gridSize: number; colors: number; rounds: number };
   started: boolean;
 };
-const rooms: { [roomKey: string]: Room } = {};
+const rooms: { [roomKey: string]: Room } = {};   //metadata of the rooms
 
 
 console.log("Backend restarted. Cleared all rooms.");
 
-const roomStats: { [roomKey: string]: any[] } = {};
+const roomStats: { [roomKey: string]: any[] } = {};   //for local leaderboard
 
 
 io.on("connection", (socket) => {
@@ -68,7 +68,11 @@ io.on("connection", (socket) => {
     if (!room.players.some(p => p.id === socket.id)) {
       room.players.push({ id: socket.id, name });
     }
-
+// {
+// Socket.io internally stores rooms like this:
+//   "ABC123": Set(socket1, socket2, socket3),
+//   "XYZ999": Set(socket4, socket5)
+// }
     socket.join(roomKey);
     cb({ success: true });
     io.to(roomKey).emit("room-updated", room);
