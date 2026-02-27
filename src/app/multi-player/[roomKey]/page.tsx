@@ -201,7 +201,6 @@ const RoomPage = () => {
     const newMoves = moves + 1
     setMoves(newMoves)
 
-    // Check if game is won (all cells same color)
     const allSameColor = newBoard.every(row => 
       row.every(cell => cell === newBoard[0][0])
     )
@@ -229,7 +228,6 @@ const RoomPage = () => {
           name,
           moves,
           time: totalTime,
-          
         });
       }  
     }
@@ -318,7 +316,6 @@ const RoomPage = () => {
                         </div>
                       )
                     }    
-
                   </div>
                
             {/* Game Status */}
